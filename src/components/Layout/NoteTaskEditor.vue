@@ -9,7 +9,7 @@
 			toolbar="full" />
 		<div class="flex gap-2 mt-2">
 			<button class="btn btn-accent">Save</button>
-			<button class="btn btn-neutral">Delete</button>
+			<button class="btn btn-outline btn-warning">Delete</button>
 		</div>
 	</section>
 </template>

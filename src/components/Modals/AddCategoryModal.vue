@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-blue-900 p-8 rounded-lg shadow-lg w-96">
+	<div class="bg-[#34496C] p-8 rounded-lg shadow-lg w-96">
 		<label class="block text-blue-200 text-lg mb-2">Category Name:</label>
 		<input
 			v-model="newCategoryName"
@@ -21,13 +21,13 @@
 		</div>
 		<div class="flex gap-4">
 			<button
-				class="btn btn-primary"
+				class="btn btn-accent"
 				@click="
 					emit('add', { name: newCategoryName, color: selectedColor })
 				">
 				Add
 			</button>
-			<button class="btn btn-neutral" @click="emit('close')">
+			<button class="btn btn-outline btn-warning" @click="emit('close')">
 				Cancel
 			</button>
 		</div>
@@ -36,7 +36,6 @@
 
 <script setup>
 import { ref } from "vue";
-import { defineEmits } from "vue";
 
 const emit = defineEmits(["add", "close"]);
 const newCategoryName = ref("");
