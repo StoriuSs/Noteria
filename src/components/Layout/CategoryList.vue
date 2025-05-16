@@ -20,14 +20,20 @@
 				v-for="category in categories"
 				:key="category.id">
 				<button
-					class="btn btn-ghost w-full flex justify-start"
-					:style="{ 'background-color': '#304262' }">
+					class="btn btn-ghost w-full flex justify-start category-button"
+					:style="{
+						'background-color':
+							currentCategory === category.id
+								? '#304262'
+								: 'transparent',
+					}"
+					@click="setCurrentCategory(category.id)">
 					<span
 						class="inline-block w-4 h-4 rounded-full mr-2"
 						:style="{ 'background-color': category.color }"></span>
 					{{ category.name }}
 					<svg
-						class="feather feather-edit ml-auto"
+						class="feather feather-edit ml-auto edit-icon"
 						fill="none"
 						height="24"
 						stroke="currentColor"
@@ -58,13 +64,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useCategoryStore } from "../../stores/categoryStore";
 import AddCategoryModal from "../Modals/AddCategoryModal.vue";
 
 const showModal = ref(false);
 const categoryStore = useCategoryStore();
 const categories = categoryStore.getCategories;
+const currentCategory = computed(() => categoryStore.currentCategory);
 
 function addCategory({ name, color }) {
 	if (!name.trim()) return;
@@ -75,4 +82,21 @@ function addCategory({ name, color }) {
 function closeModal() {
 	showModal.value = false;
 }
+
+function setCurrentCategory(categoryId) {
+	categoryStore.setCurrentCategory(categoryId);
+}
 </script>
+
+<style scoped>
+/* Hide the edit icon */
+.edit-icon {
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+/* Show the edit icon on hover */
+.category-button:hover .edit-icon {
+	opacity: 1;
+}
+</style>
