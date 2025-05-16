@@ -1,10 +1,10 @@
 <template>
 	<aside class="h-full p-4 flex flex-col bg-base-200">
 		<div class="flex items-center mb-6 gap-1">
-			<img src="../assets/img/notes.png" alt="Logo" />
+			<img src="../../assets/img/notes.png" alt="Logo" />
 			<span class="font-bold text-xl tracking-wide mr-auto">NOTERIA</span>
 			<img
-				src="../assets/img/hide.png"
+				src="../../assets/img/hide.png"
 				alt="Collapse-icon"
 				class="cursor-pointer" />
 		</div>

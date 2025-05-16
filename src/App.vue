@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import CategoryList from "./components/CategoryList.vue";
-import NoteTaskList from "./components/NoteTaskList.vue";
-import NoteTaskEditor from "./components/NoteTaskEditor.vue";
+import CategoryList from "./components/Layout/CategoryList.vue";
+import NoteTaskList from "./components/Layout/NoteTaskList.vue";
+import NoteTaskEditor from "./components/Layout/NoteTaskEditor.vue";
 </script>
