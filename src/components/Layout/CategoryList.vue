@@ -15,16 +15,19 @@
 			+ Category
 		</button>
 		<ul class="flex-1 overflow-y-auto">
-			<li class="mb-1" v-for="category in categories" :key="category.id">
+			<li
+				class="mb-1.5"
+				v-for="category in categories"
+				:key="category.id">
 				<button
-					class="btn btn-ghost w-full flex not-[]:justify-start"
+					class="btn btn-ghost w-full flex justify-start"
 					:style="{ 'background-color': '#304262' }">
 					<span
 						class="inline-block w-4 h-4 rounded-full mr-2"
 						:style="{ 'background-color': category.color }"></span>
 					{{ category.name }}
 					<svg
-						class="feather feather-edit"
+						class="feather feather-edit ml-auto"
 						fill="none"
 						height="24"
 						stroke="currentColor"
