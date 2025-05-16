@@ -15,11 +15,14 @@ export const useCategoryStore = defineStore("category", {
 	},
 
 	actions: {
-		addCategory(category) {
+		addCategory(name, color) {
 			this.categories.push({
 				id: crypto.randomUUID(),
-				...category,
+				name,
+				color,
 				createdAt: useDateFormat(new Date(), "YYYY-MM-DD HH:mm:ss")
+					.value,
+				updatedAt: useDateFormat(new Date(), "YYYY-MM-DD HH:mm:ss")
 					.value,
 			});
 		},
