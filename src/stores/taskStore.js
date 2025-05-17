@@ -24,6 +24,7 @@ export const useTaskStore = defineStore("task", {
 		addTask(task) {
 			this.tasks.push({
 				id: crypto.randomUUID(),
+				type: "task",
 				status: "pending",
 				...task,
 				createdAt: useDateFormat(new Date(), "YYYY-MM-DD HH:mm:ss")

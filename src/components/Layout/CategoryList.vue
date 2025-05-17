@@ -9,7 +9,7 @@
 				class="cursor-pointer" />
 		</div>
 		<input
-			class="input input-bordered w-full mb-2"
+			class="input input-bordered w-full mb-4"
 			placeholder="Search note" />
 		<button class="btn btn-primary w-full mb-4" @click="showModal = true">
 			+ Category

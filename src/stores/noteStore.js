@@ -21,6 +21,7 @@ export const useNoteStore = defineStore("note", {
 		addNote(note) {
 			this.notes.push({
 				id: crypto.randomUUID(),
+				type: "note",
 				...note,
 				createdAt: useDateFormat(new Date(), "YYYY-MM-DD HH:mm:ss")
 					.value,

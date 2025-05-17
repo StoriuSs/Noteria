@@ -1,7 +1,7 @@
 <template>
 	<section class="h-full p-4 flex flex-col bg-base-100">
 		<input
-			class="input input-bordered w-full mb-2"
+			class="input input-bordered w-full mb-4"
 			placeholder="Search in note content" />
 		<div class="flex gap-2 mb-4">
 			<button class="btn btn-info w-28" @click="showNoteModal">
@@ -20,8 +20,7 @@
 						class="inline-block w-4 h-4 rounded-full mr-2"
 						:style="{
 							'background-color':
-								categoryStore.getCategoryById(note.categoryId)
-									?.color || '#00a9e7',
+								note.type === 'note' ? '#00a9e7' : '#DE2A8A',
 						}"></span>
 					{{ note.title }}
 				</button>
