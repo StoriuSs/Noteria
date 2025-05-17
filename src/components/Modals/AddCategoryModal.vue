@@ -3,6 +3,7 @@
 		<label class="block text-blue-200 text-lg mb-2">Category Name:</label>
 		<input
 			v-model="newCategoryName"
+			v-autofocus
 			class="input input-bordered w-full mb-4" />
 		<div class="flex gap-3 mb-4">
 			<span
@@ -36,6 +37,7 @@
 
 <script setup>
 import { ref } from "vue";
+import { vAutofocus } from "../../directives/vAutofocus";
 
 const emit = defineEmits(["add", "close"]);
 const newCategoryName = ref("");

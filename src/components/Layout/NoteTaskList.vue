@@ -12,7 +12,7 @@
 			</button>
 		</div>
 		<ul class="flex-1 overflow-y-auto">
-			<li v-for="note in notes" :key="note.id" class="mb-1.5">
+			<li v-for="note in notesByCategory" :key="note.id" class="mb-1.5">
 				<button
 					class="btn btn-ghost w-full justify-start"
 					:style="{ 'background-color': '#304262' }">
@@ -33,7 +33,7 @@
 			class="fixed inset-0 flex items-center justify-center z-50">
 			<BaseModal
 				:modalTitle="modalTitle"
-				@add="modalTitle === 'Add Note' ? addNote($event) : null"
+				@add="modalTitle === 'Note Title' ? addNote($event) : null"
 				@close="closeModal" />
 		</div>
 	</section>
@@ -51,15 +51,18 @@ const noteStore = useNoteStore();
 const categoryStore = useCategoryStore();
 
 const notes = computed(() => noteStore.getAllNotes);
+const notesByCategory = computed(() =>
+	noteStore.getNotesByCategory(categoryStore.currentCategory)
+);
 
 const showNoteModal = () => {
 	showModal.value = true;
-	modalTitle.value = "Add Note";
+	modalTitle.value = "Note Title";
 };
 
 const showTaskModal = () => {
 	showModal.value = true;
-	modalTitle.value = "Add Task";
+	modalTitle.value = "Task Title";
 };
 
 const addNote = (title) => {

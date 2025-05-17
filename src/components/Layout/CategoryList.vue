@@ -76,6 +76,7 @@ const currentCategory = computed(() => categoryStore.currentCategory);
 function addCategory({ name, color }) {
 	if (!name.trim()) return;
 	categoryStore.addCategory(name, color);
+	categoryStore.setCurrentCategory(categoryStore.categories[0].id);
 	closeModal();
 }
 

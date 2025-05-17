@@ -16,7 +16,7 @@ export const useCategoryStore = defineStore("category", {
 
 	actions: {
 		addCategory(name, color) {
-			this.categories.push({
+			this.categories.unshift({
 				id: crypto.randomUUID(),
 				name,
 				color,
