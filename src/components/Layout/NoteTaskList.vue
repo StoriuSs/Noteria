@@ -12,17 +12,26 @@
 			</button>
 		</div>
 		<ul class="flex-1 overflow-y-auto">
-			<li v-for="note in allNotesAndTasks" :key="note.id" class="mb-1.5">
+			<li v-for="item in allNotesAndTasks" :key="item.id" class="mb-1.5">
 				<button
+					@click="setCurrentItem(item)"
 					class="btn btn-ghost w-full justify-start"
-					:style="{ 'background-color': '#304262' }">
+					:style="{
+						'background-color':
+							(item.type === 'note' &&
+								noteStore.currentNote === item.id) ||
+							(item.type === 'task' &&
+								taskStore.currentTask === item.id)
+								? '#304262'
+								: 'transparent',
+					}">
 					<span
 						class="inline-block w-4 h-4 rounded-full mr-2"
 						:style="{
 							'background-color':
-								note.type === 'note' ? '#00a9e7' : '#DE2A8A',
+								item.type === 'note' ? '#00a9e7' : '#DE2A8A',
 						}"></span>
-					{{ note.title }}
+					{{ item.title }}
 				</button>
 			</li>
 		</ul>
@@ -112,5 +121,15 @@ const addTask = (title) => {
 };
 const closeModal = () => {
 	showModal.value = false;
+};
+
+const setCurrentItem = (item) => {
+	if (item.type === "note") {
+		noteStore.setCurrentNote(item.id);
+		taskStore.setCurrentTask(null);
+	} else {
+		taskStore.setCurrentTask(item.id);
+		noteStore.setCurrentNote(null);
+	}
 };
 </script>
