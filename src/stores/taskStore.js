@@ -22,7 +22,7 @@ export const useTaskStore = defineStore("task", {
 
 	actions: {
 		addTask(task) {
-			this.tasks.push({
+			this.tasks.unshift({
 				id: crypto.randomUUID(),
 				type: "task",
 				status: "pending",

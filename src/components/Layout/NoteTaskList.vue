@@ -12,7 +12,7 @@
 			</button>
 		</div>
 		<ul class="flex-1 overflow-y-auto">
-			<li v-for="note in notesByCategory" :key="note.id" class="mb-1.5">
+			<li v-for="note in allNotesAndTasks" :key="note.id" class="mb-1.5">
 				<button
 					class="btn btn-ghost w-full justify-start"
 					:style="{ 'background-color': '#304262' }">
@@ -32,7 +32,11 @@
 			class="fixed inset-0 flex items-center justify-center z-50">
 			<BaseModal
 				:modalTitle="modalTitle"
-				@add="modalTitle === 'Note Title' ? addNote($event) : null"
+				@add="
+					modalTitle === 'Note Title'
+						? addNote($event)
+						: addTask($event)
+				"
 				@close="closeModal" />
 		</div>
 	</section>
@@ -42,30 +46,51 @@
 import { ref, computed } from "vue";
 import BaseModal from "../Modals/BaseModal.vue";
 import { useNoteStore } from "../../stores/noteStore";
+import { useTaskStore } from "../../stores/taskStore";
 import { useCategoryStore } from "../../stores/categoryStore";
 
 const showModal = ref(false);
 const modalTitle = ref("");
 const noteStore = useNoteStore();
+const taskStore = useTaskStore();
 const categoryStore = useCategoryStore();
 
-const notes = computed(() => noteStore.getAllNotes);
 const notesByCategory = computed(() =>
 	noteStore.getNotesByCategory(categoryStore.currentCategory)
 );
 
+const tasksByCategory = computed(() =>
+	taskStore.getTasksByCategory(categoryStore.currentCategory)
+);
+
+const allNotesAndTasks = computed(() => [
+	...notesByCategory.value,
+	...tasksByCategory.value,
+]);
+
 const showNoteModal = () => {
+	if (categoryStore.currentCategory === null) {
+		alert("A category must be selected first!");
+		return;
+	}
 	showModal.value = true;
 	modalTitle.value = "Note Title";
 };
 
 const showTaskModal = () => {
+	if (categoryStore.currentCategory === null) {
+		alert("A category must be selected first!");
+		return;
+	}
 	showModal.value = true;
 	modalTitle.value = "Task Title";
 };
 
 const addNote = (title) => {
-	if (!title?.trim()) return;
+	if (!title?.trim()) {
+		alert("Note title cannot be empty!");
+		return;
+	}
 	noteStore.addNote({
 		title,
 		categoryId: categoryStore.currentCategory,
@@ -74,6 +99,17 @@ const addNote = (title) => {
 	closeModal();
 };
 
+const addTask = (title) => {
+	if (!title?.trim()) {
+		alert("Task title cannot be empty!");
+		return;
+	}
+	taskStore.addTask({
+		title,
+		categoryId: categoryStore.currentCategory,
+	});
+	closeModal();
+};
 const closeModal = () => {
 	showModal.value = false;
 };
