@@ -14,14 +14,12 @@
 		<ul class="flex-1 overflow-y-auto">
 			<li v-for="item in allNotesAndTasks" :key="item.id" class="mb-1.5">
 				<button
-					@click="setCurrentItem(item)"
+					@click="noteTaskStore.setCurrentItem(item.id, item.type)"
 					class="btn btn-ghost w-full justify-start"
 					:style="{
 						'background-color':
-							(item.type === 'note' &&
-								noteStore.currentNote === item.id) ||
-							(item.type === 'task' &&
-								taskStore.currentTask === item.id)
+							noteTaskStore.currentItem === item.id &&
+							noteTaskStore.currentItemType === item.type
 								? '#304262'
 								: 'transparent',
 					}">
@@ -41,11 +39,7 @@
 			class="fixed inset-0 flex items-center justify-center z-50">
 			<BaseModal
 				:modalTitle="modalTitle"
-				@add="
-					modalTitle === 'Note Title'
-						? addNote($event)
-						: addTask($event)
-				"
+				@add="addItem($event)"
 				@close="closeModal" />
 		</div>
 	</section>
@@ -54,28 +48,17 @@
 <script setup>
 import { ref, computed } from "vue";
 import BaseModal from "../Modals/BaseModal.vue";
-import { useNoteStore } from "../../stores/noteStore";
-import { useTaskStore } from "../../stores/taskStore";
 import { useCategoryStore } from "../../stores/categoryStore";
+import { useNoteTaskStore } from "../../stores/noteTaskStore";
 
 const showModal = ref(false);
 const modalTitle = ref("");
-const noteStore = useNoteStore();
-const taskStore = useTaskStore();
 const categoryStore = useCategoryStore();
+const noteTaskStore = useNoteTaskStore();
 
-const notesByCategory = computed(() =>
-	noteStore.getNotesByCategory(categoryStore.currentCategory)
+const allNotesAndTasks = computed(() =>
+	noteTaskStore.getItemsByCategory(categoryStore.currentCategory)
 );
-
-const tasksByCategory = computed(() =>
-	taskStore.getTasksByCategory(categoryStore.currentCategory)
-);
-
-const allNotesAndTasks = computed(() => [
-	...notesByCategory.value,
-	...tasksByCategory.value,
-]);
 
 const showNoteModal = () => {
 	if (categoryStore.currentCategory === null) {
@@ -95,41 +78,24 @@ const showTaskModal = () => {
 	modalTitle.value = "Task Title";
 };
 
-const addNote = (title) => {
-	if (!title?.trim()) {
-		alert("Note title cannot be empty!");
-		return;
-	}
-	noteStore.addNote({
+const addItem = (title) => {
+	noteTaskStore.addItem({
+		type: modalTitle.value === "Note Title" ? "note" : "task",
 		title,
 		categoryId: categoryStore.currentCategory,
-		content: "",
 	});
+
+	const items = noteTaskStore.getItemsByCategory(
+		categoryStore.currentCategory
+	);
+	if (items.length > 0) {
+		// Set the first item (newly added) as current
+		noteTaskStore.setCurrentItem(items[0].id, items[0].type);
+	}
 	closeModal();
 };
 
-const addTask = (title) => {
-	if (!title?.trim()) {
-		alert("Task title cannot be empty!");
-		return;
-	}
-	taskStore.addTask({
-		title,
-		categoryId: categoryStore.currentCategory,
-	});
-	closeModal();
-};
 const closeModal = () => {
 	showModal.value = false;
-};
-
-const setCurrentItem = (item) => {
-	if (item.type === "note") {
-		noteStore.setCurrentNote(item.id);
-		taskStore.setCurrentTask(null);
-	} else {
-		taskStore.setCurrentTask(item.id);
-		noteStore.setCurrentNote(null);
-	}
 };
 </script>
