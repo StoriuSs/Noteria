@@ -79,6 +79,10 @@ const showTaskModal = () => {
 };
 
 const addItem = (title) => {
+	if (!title?.trim()) {
+		alert("Note/Task title cannot be empty!");
+		return;
+	}
 	noteTaskStore.addItem({
 		type: modalTitle.value === "Note Title" ? "note" : "task",
 		title,
