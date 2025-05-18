@@ -1,5 +1,5 @@
 <template>
-	<aside class="h-full p-4 flex flex-col bg-base-200">
+	<aside class="h-full p-4 flex flex-col">
 		<div class="flex items-center mb-6 gap-1">
 			<img src="../../assets/img/notes.png" alt="Logo" />
 			<span class="font-bold text-xl tracking-wide mr-auto">NOTERIA</span>

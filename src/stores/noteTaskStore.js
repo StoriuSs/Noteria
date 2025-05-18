@@ -50,6 +50,14 @@ export const useNoteTaskStore = defineStore("noteTask", {
 				taskStore.addTask({
 					title,
 					categoryId,
+					status: "pending",
+					priority: "medium",
+					description: "",
+					dueDate: "",
+					subtasks: [],
+					hasReminder: false,
+					reminderTime: null,
+					reminderType: null,
 				});
 			}
 		},

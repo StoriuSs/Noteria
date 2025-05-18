@@ -5,12 +5,14 @@
 		<!-- Notes/Tasks List -->
 		<NoteTaskList class="w-1/6 min-w-[260px] border-r border-base-200" />
 		<!-- Main Content Area -->
-		<NoteTaskEditor class="flex-1" />
+		<!-- <NoteEditor class="flex-1" /> -->
+		<TaskEditor class="flex-1" />
 	</div>
 </template>
 
 <script setup>
 import CategoryList from "./components/Layout/CategoryList.vue";
 import NoteTaskList from "./components/Layout/NoteTaskList.vue";
-import NoteTaskEditor from "./components/Layout/NoteTaskEditor.vue";
+import NoteEditor from "./components/Layout/NoteEditor.vue";
+import TaskEditor from "./components/Layout/TaskEditor.vue";
 </script>
