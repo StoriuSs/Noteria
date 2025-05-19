@@ -19,8 +19,7 @@
 				v-model="title"
 				class="input input-ghost text-2xl font-semibold flex-1 px-2 hover:bg-base-200 focus:bg-base-200 transition-colors"
 				:class="{ 'line-through opacity-60': status === 'completed' }"
-				placeholder="Task Title"
-				@input="updateTask" />
+				placeholder="Task Title" />
 		</div>
 
 		<!-- Task Details -->
@@ -35,8 +34,7 @@
 						type="datetime-local"
 						v-model="dueDate"
 						class="input input-bordered w-full pr-10"
-						:class="{ 'input-warning': isOverdue }"
-						@change="updateTask" />
+						:class="{ 'input-warning': isOverdue }" />
 				</div>
 			</div>
 
@@ -52,8 +50,7 @@
 						'select-error': priority === 'high',
 						'select-warning': priority === 'medium',
 						'select-success': priority === 'low',
-					}"
-					@change="updateTask">
+					}">
 					<option value="low">Low Priority</option>
 					<option value="medium">Medium Priority</option>
 					<option value="high">High Priority</option>
@@ -72,8 +69,7 @@
 					<input
 						type="checkbox"
 						v-model="hasReminder"
-						class="toggle toggle-primary"
-						@change="updateTask" />
+						class="toggle toggle-primary" />
 				</label>
 			</div>
 
@@ -87,8 +83,7 @@
 						<input
 							type="datetime-local"
 							v-model="reminderTime"
-							class="input input-bordered w-full pr-10"
-							@change="updateTask" />
+							class="input input-bordered w-full pr-10" />
 					</div>
 				</div>
 
@@ -99,8 +94,7 @@
 					</label>
 					<select
 						v-model="reminderType"
-						class="select select-bordered w-full"
-						@change="updateTask">
+						class="select select-bordered w-full">
 						<option value="notification">Notification</option>
 						<option value="email">Email</option>
 					</select>
@@ -116,8 +110,7 @@
 			<textarea
 				v-model="description"
 				class="textarea textarea-bordered h-30 resize-none focus:resize-x"
-				placeholder="Add a description..."
-				@input="updateTask"></textarea>
+				placeholder="Add a description..."></textarea>
 		</div>
 
 		<!-- Subtasks -->
@@ -143,7 +136,6 @@
 					<input
 						type="checkbox"
 						v-model="subtask.completed"
-						@change="updateTask"
 						class="checkbox checkbox-primary" />
 					<input
 						v-model="subtask.title"
@@ -151,8 +143,7 @@
 						:class="{
 							'line-through opacity-60': subtask.completed,
 						}"
-						placeholder="Subtask"
-						@input="updateTask" />
+						placeholder="Subtask" />
 					<button
 						class="btn btn-ghost btn-sm btn-circle"
 						@click="removeSubtask(index)">
@@ -266,19 +257,16 @@ watch(
 // Toggle task status
 const toggleStatus = () => {
 	status.value = status.value === "completed" ? "pending" : "completed";
-	updateTask();
 };
 
 // Add new subtask
 const addSubtask = () => {
 	subtasks.value.push({ title: "", completed: false });
-	updateTask();
 };
 
 // Remove subtask
 const removeSubtask = (index) => {
 	subtasks.value.splice(index, 1);
-	updateTask();
 };
 
 // Update task in store

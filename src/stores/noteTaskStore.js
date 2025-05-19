@@ -89,5 +89,16 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			noteStore.setCurrentNote(null);
 			taskStore.setCurrentTask(null);
 		},
+
+		updateItem(id, type, updates) {
+			const noteStore = useNoteStore();
+			const taskStore = useTaskStore();
+
+			if (type === "note") {
+				noteStore.updateNote(id, updates);
+			} else if (type === "task") {
+				taskStore.updateTask(id, updates);
+			}
+		},
 	},
 });
