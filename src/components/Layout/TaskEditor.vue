@@ -30,11 +30,12 @@
 					<span class="label-text font-medium">Due Date</span>
 				</label>
 				<div class="relative">
-					<input
-						type="datetime-local"
+					<flat-pickr
 						v-model="dueDate"
-						class="input input-bordered w-full pr-10"
-						:class="{ 'input-warning': isOverdue }" />
+						:config="dueDateConfig"
+						class="input input-bordered w-full"
+						:class="{ 'input-warning': isOverdue }"
+						placeholder="Select due date and time" />
 				</div>
 			</div>
 
@@ -80,10 +81,11 @@
 						<span class="label-text">Remind me at</span>
 					</label>
 					<div class="relative">
-						<input
-							type="datetime-local"
+						<flat-pickr
 							v-model="reminderTime"
-							class="input input-bordered w-full pr-10" />
+							:config="reminderTimeConfig"
+							class="input input-bordered w-full"
+							placeholder="Select reminder time" />
 					</div>
 				</div>
 
@@ -109,7 +111,7 @@
 			</label>
 			<textarea
 				v-model="description"
-				class="textarea textarea-bordered h-30 resize-none focus:resize-x"
+				class="textarea textarea-bordered h-30 w-120 resize-none focus:resize-x"
 				placeholder="Add a description..."></textarea>
 		</div>
 
@@ -197,6 +199,12 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
+import flatPickr from "vue-flatpickr-component";
+import "flatpickr/dist/flatpickr.css";
+
+const components = {
+	flatPickr,
+};
 
 const noteTaskStore = useNoteTaskStore();
 const currentTask = computed(() => noteTaskStore.getCurrentItem);
@@ -211,6 +219,26 @@ const subtasks = ref([]);
 const hasReminder = ref(false);
 const reminderTime = ref("");
 const reminderType = ref("notification");
+
+// Flatpickr configurations
+const dueDateConfig = computed(() => ({
+	enableTime: true,
+	dateFormat: "Y-m-d H:i",
+	time_24hr: true,
+	allowInput: true,
+	wrap: true,
+	theme: "light",
+}));
+
+const reminderTimeConfig = computed(() => ({
+	enableTime: true,
+	dateFormat: "Y-m-d H:i",
+	time_24hr: true,
+	allowInput: true,
+	wrap: true,
+	minDate: "today",
+	theme: "light",
+}));
 
 // Computed properties
 const completedSubtasks = computed(
