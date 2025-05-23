@@ -23,13 +23,23 @@
 								? '#304262'
 								: 'transparent',
 					}">
-					<span
-						class="inline-block w-4 h-4 rounded-full mr-2"
-						:style="{
-							'background-color':
-								item.type === 'note' ? '#00a9e7' : '#DE2A8A',
-						}"></span>
-					{{ item.title }}
+					<span class="flex items-center w-full">
+						<!-- Color indicator -->
+						<span
+							class="inline-block flex-shrink-0 w-4 h-4 rounded-full mr-2"
+							:style="{
+								'background-color':
+									item.type === 'note'
+										? '#00a9e7'
+										: '#DE2A8A',
+							}"></span>
+
+						<!-- Title -->
+						<span
+							class="flex-1 text-left overflow-hidden text-ellipsis whitespace-nowrap">
+							{{ item.title }}
+						</span>
+					</span>
 				</button>
 			</li>
 		</ul>
@@ -42,6 +52,7 @@
 				@add="addItem($event)"
 				@close="closeModal" />
 		</div>
+		<!-- $event here is the custom data (the title string) that was emitted from the BaseModal component.  -->
 	</section>
 </template>
 

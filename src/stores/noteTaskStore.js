@@ -100,5 +100,16 @@ export const useNoteTaskStore = defineStore("noteTask", {
 				taskStore.updateTask(id, updates);
 			}
 		},
+
+		deleteItem(id, type) {
+			const noteStore = useNoteStore();
+			const taskStore = useTaskStore();
+
+			if (type === "note") {
+				noteStore.deleteNote(id);
+			} else if (type === "task") {
+				taskStore.deleteTask(id);
+			}
+		},
 	},
 });
