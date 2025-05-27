@@ -208,6 +208,8 @@ import { ref, computed, watch } from "vue";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import flatPickr from "vue-flatpickr-component";
 import "flatpickr/dist/flatpickr.css";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const components = {
 	flatPickr,
@@ -319,6 +321,7 @@ const updateTask = () => {
 		reminderTime: hasReminder.value ? reminderTime.value : null,
 		reminderType: hasReminder.value ? reminderType.value : null,
 	});
+	triggerToast("Task updated successfully!");
 };
 
 // Delete current task
@@ -329,5 +332,13 @@ const deleteTask = () => {
 		noteTaskStore.deleteItem(currentTask.value.id, "task");
 		noteTaskStore.clearCurrentItem();
 	}
+	triggerToast("Task deleted successfully!");
+};
+
+const triggerToast = (message) => {
+	toast.success(message, {
+		autoClose: 1500,
+		position: toast.POSITION.TOP_CENTER,
+	});
 };
 </script>

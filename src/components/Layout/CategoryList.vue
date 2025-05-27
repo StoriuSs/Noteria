@@ -84,6 +84,8 @@ import { ref, computed } from "vue";
 import { useCategoryStore } from "../../stores/categoryStore";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import AddCategoryModal from "../Modals/AddCategoryModal.vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const showModal = ref(false);
 const categoryStore = useCategoryStore();
@@ -92,7 +94,10 @@ const currentCategory = computed(() => categoryStore.currentCategory);
 const noteTaskStore = useNoteTaskStore();
 
 function addCategory({ name, color }) {
-	if (!name.trim()) return;
+	if (!name.trim()) {
+		triggerToast("Category name cannot be empty!");
+		return;
+	}
 	categoryStore.addCategory(name, color);
 	categoryStore.setCurrentCategory(categoryStore.categories[0].id);
 	closeModal();
@@ -106,6 +111,13 @@ function closeModal() {
 function setCurrentCategory(categoryId) {
 	categoryStore.setCurrentCategory(categoryId);
 }
+
+const triggerToast = (message) => {
+	toast.error(message, {
+		autoClose: 1000,
+		position: toast.POSITION.TOP_CENTER,
+	});
+};
 </script>
 
 <style scoped>

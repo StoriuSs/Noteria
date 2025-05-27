@@ -50,12 +50,20 @@
 			</span>
 		</div>
 	</section>
+	<!-- Toast Notification -->
+	<div class="toast toast-top toast-center" v-if="showToast">
+		<div class="alert alert-success text-xl py-6 px-8 w-auto min-w-[150px]">
+			<span>{{ toastMessage }}</span>
+		</div>
+	</div>
 </template>
 
 <script setup>
 import { QuillEditor } from "@vueup/vue-quill";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import { ref, computed, watch } from "vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const noteTaskStore = useNoteTaskStore();
 
@@ -84,6 +92,7 @@ const updateNote = () => {
 		title: title.value,
 		content: content.value,
 	});
+	triggerToast("Note updated successfully!");
 };
 
 const deleteNote = () => {
@@ -93,6 +102,7 @@ const deleteNote = () => {
 		noteTaskStore.deleteItem(currentNote.value.id, "note");
 		noteTaskStore.clearCurrentItem();
 	}
+	triggerToast("Note deleted successfully!");
 };
 
 const wordCount = computed(() => {
@@ -114,4 +124,11 @@ const wordCount = computed(() => {
 	const plain = text.replace(/<[^>]*>/g, " ").trim();
 	return plain ? plain.split(/\s+/).length : 0;
 });
+
+const triggerToast = (message) => {
+	toast.success(message, {
+		autoClose: 1500,
+		position: toast.POSITION.TOP_CENTER,
+	});
+};
 </script>

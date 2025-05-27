@@ -67,6 +67,8 @@ import { ref, computed } from "vue";
 import BaseModal from "../Modals/BaseModal.vue";
 import { useCategoryStore } from "../../stores/categoryStore";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const showModal = ref(false);
 const modalTitle = ref("");
@@ -79,7 +81,7 @@ const allNotesAndTasks = computed(() =>
 
 const showNoteModal = () => {
 	if (categoryStore.currentCategory === null) {
-		alert("A category must be selected first!");
+		triggerToast("A category must be selected first!");
 		return;
 	}
 	showModal.value = true;
@@ -88,7 +90,7 @@ const showNoteModal = () => {
 
 const showTaskModal = () => {
 	if (categoryStore.currentCategory === null) {
-		alert("A category must be selected first!");
+		triggerToast("A category must be selected first!");
 		return;
 	}
 	showModal.value = true;
@@ -97,7 +99,7 @@ const showTaskModal = () => {
 
 const addItem = (title) => {
 	if (!title?.trim()) {
-		alert("Note/Task title cannot be empty!");
+		triggerToast("Note/Task title cannot be empty!");
 		return;
 	}
 	noteTaskStore.addItem({
@@ -118,5 +120,12 @@ const addItem = (title) => {
 
 const closeModal = () => {
 	showModal.value = false;
+};
+
+const triggerToast = (message) => {
+	toast.error(message, {
+		autoClose: 1000,
+		position: toast.POSITION.TOP_CENTER,
+	});
 };
 </script>
