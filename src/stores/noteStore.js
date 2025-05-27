@@ -19,12 +19,10 @@ export const useNoteStore = defineStore("note", {
 
 	actions: {
 		addNote(note) {
-			this.notes.push({
+			this.notes.unshift({
 				id: crypto.randomUUID(),
 				type: "note",
 				...note,
-				createdAt: useDateFormat(new Date(), "YYYY-MM-DD HH:mm:ss")
-					.value,
 				updatedAt: useDateFormat(new Date(), "YYYY-MM-DD HH:mm:ss")
 					.value,
 			});

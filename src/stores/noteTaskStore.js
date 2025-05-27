@@ -16,9 +16,9 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			const notes = noteStore.getNotesByCategory(categoryId);
 			const tasks = taskStore.getTasksByCategory(categoryId);
 
-			// Sort by creation date
+			// Sort by updated date
 			return [...notes, ...tasks].sort(
-				(a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+				(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
 			);
 		},
 

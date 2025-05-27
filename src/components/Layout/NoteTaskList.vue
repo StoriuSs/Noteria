@@ -13,34 +13,40 @@
 		</div>
 		<ul class="flex-1 overflow-y-auto">
 			<li v-for="item in allNotesAndTasks" :key="item.id" class="mb-1.5">
-				<button
-					@click="noteTaskStore.setCurrentItem(item.id, item.type)"
-					class="btn btn-ghost w-full justify-start"
-					:style="{
-						'background-color':
-							noteTaskStore.currentItem === item.id &&
-							noteTaskStore.currentItemType === item.type
-								? '#304262'
-								: 'transparent',
-					}">
-					<span class="flex items-center w-full">
-						<!-- Color indicator -->
-						<span
-							class="inline-block flex-shrink-0 w-4 h-4 rounded-full mr-2"
-							:style="{
-								'background-color':
-									item.type === 'note'
-										? '#00a9e7'
-										: '#DE2A8A',
-							}"></span>
+				<div
+					class="tooltip w-full"
+					:data-tip="`${item.type} | ${item.updatedAt}`">
+					<button
+						@click="
+							noteTaskStore.setCurrentItem(item.id, item.type)
+						"
+						class="btn btn-ghost w-full justify-start"
+						:style="{
+							'background-color':
+								noteTaskStore.currentItem === item.id &&
+								noteTaskStore.currentItemType === item.type
+									? '#304262'
+									: 'transparent',
+						}">
+						<span class="flex items-center w-full">
+							<!-- Color indicator -->
+							<span
+								class="inline-block flex-shrink-0 w-4 h-4 rounded-full mr-2"
+								:style="{
+									'background-color':
+										item.type === 'note'
+											? '#00a9e7'
+											: '#DE2A8A',
+								}"></span>
 
-						<!-- Title -->
-						<span
-							class="flex-1 text-left overflow-hidden text-ellipsis whitespace-nowrap">
-							{{ item.title }}
+							<!-- Title -->
+							<span
+								class="flex-1 text-left overflow-hidden text-ellipsis whitespace-nowrap">
+								{{ item.title }}
+							</span>
 						</span>
-					</span>
-				</button>
+					</button>
+				</div>
 			</li>
 		</ul>
 

@@ -165,7 +165,8 @@
 		</div>
 
 		<!-- Action Buttons -->
-		<div class="flex gap-3 mt-auto pt-4 border-t border-base-200 z-10">
+		<div
+			class="flex items-center gap-3 mt-auto pt-4 border-t border-base-200 z-10">
 			<button class="btn btn-accent" @click="updateTask">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +180,9 @@
 				</svg>
 				Save Changes
 			</button>
-			<button class="btn btn-outline btn-error" @click="deleteTask">
+			<button
+				class="btn btn-outline btn-error mr-auto"
+				@click="deleteTask">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-5 w-5"
@@ -192,6 +195,10 @@
 				</svg>
 				Delete Task
 			</button>
+
+			<span class="text-md opacity-70">
+				<span> Last Updated: {{ currentTask.updatedAt }} </span>
+			</span>
 		</div>
 	</section>
 </template>

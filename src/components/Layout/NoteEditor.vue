@@ -1,14 +1,21 @@
 <template>
 	<section class="h-full p-6 flex flex-col overflow-hidden">
+		<!-- Title Input -->
 		<input
-			class="input input-bordered w-full mb-4"
+			v-model="title"
+			class="input input-bordered w-full mb-4 text-2xl font-semibold"
 			placeholder="Note Title" />
+
+		<!-- Note Editor -->
 		<QuillEditor
+			v-model:content="content"
+			:key="currentNote?.id"
 			class="flex-1 mb-4 bg-base-200 rounded-lg overflow-auto"
 			theme="snow"
 			toolbar="full" />
-		<div class="flex gap-3 mt-2">
-			<button class="btn btn-accent gap-2">
+		<div class="flex gap-3 mt-2 items-center">
+			<!-- Action Buttons -->
+			<button class="btn btn-accent gap-2" @click="updateNote">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-5 w-5"
@@ -21,7 +28,9 @@
 				</svg>
 				Save Changes
 			</button>
-			<button class="btn btn-outline btn-error">
+			<button
+				class="btn btn-outline btn-error mr-auto"
+				@click="deleteNote">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-5 w-5"
@@ -34,10 +43,75 @@
 				</svg>
 				Delete Note
 			</button>
+
+			<span class="text-md opacity-70">
+				<span class="mr-3"> Word Count: {{ wordCount }} </span>
+				<span> Last Updated: {{ currentNote.updatedAt }} </span>
+			</span>
 		</div>
 	</section>
 </template>
 
 <script setup>
 import { QuillEditor } from "@vueup/vue-quill";
+import { useNoteTaskStore } from "../../stores/noteTaskStore";
+import { ref, computed, watch } from "vue";
+
+const noteTaskStore = useNoteTaskStore();
+
+const title = ref("");
+const content = ref("");
+const currentNote = computed(() => noteTaskStore.getCurrentItem);
+
+watch(
+	currentNote,
+	(note) => {
+		if (note && note.type === "note") {
+			title.value = note.title || "";
+			content.value = note.content || "";
+		} else {
+			title.value = "";
+			content.value = "";
+		}
+	},
+	{ immediate: true }
+);
+
+const updateNote = () => {
+	if (!currentNote.value) return;
+
+	noteTaskStore.updateItem(currentNote.value.id, "note", {
+		title: title.value,
+		content: content.value,
+	});
+};
+
+const deleteNote = () => {
+	if (!currentNote.value) return;
+
+	if (confirm("Are you sure you want to delete this note?")) {
+		noteTaskStore.deleteItem(currentNote.value.id, "note");
+		noteTaskStore.clearCurrentItem();
+	}
+};
+
+const wordCount = computed(() => {
+	let text = "";
+
+	// Handle Quill Delta format or plain string
+	if (typeof content.value === "string") {
+		text = content.value;
+	} else if (
+		content.value &&
+		content.value.ops &&
+		Array.isArray(content.value.ops)
+	) {
+		text = content.value.ops
+			.map((op) => (typeof op.insert === "string" ? op.insert : ""))
+			.join(" ");
+	}
+
+	const plain = text.replace(/<[^>]*>/g, " ").trim();
+	return plain ? plain.split(/\s+/).length : 0;
+});
 </script>

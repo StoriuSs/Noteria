@@ -27,8 +27,6 @@ export const useTaskStore = defineStore("task", {
 				type: "task",
 				status: "pending",
 				...task,
-				createdAt: useDateFormat(new Date(), "YYYY-MM-DD HH:mm:ss")
-					.value,
 				updatedAt: useDateFormat(new Date(), "YYYY-MM-DD HH:mm:ss")
 					.value,
 			});
