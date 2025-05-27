@@ -331,8 +331,8 @@ const deleteTask = () => {
 	if (confirm("Are you sure you want to delete this task?")) {
 		noteTaskStore.deleteItem(currentTask.value.id, "task");
 		noteTaskStore.clearCurrentItem();
+		triggerToast("Task deleted successfully!");
 	}
-	triggerToast("Task deleted successfully!");
 };
 
 const triggerToast = (message) => {

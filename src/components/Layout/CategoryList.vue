@@ -11,7 +11,9 @@
 		<input
 			class="input input-bordered w-full mb-4"
 			placeholder="Search note" />
-		<button class="btn btn-primary w-full mb-4" @click="showModal = true">
+		<button
+			class="btn btn-primary w-full mb-4"
+			@click="showAddModal = true">
 			+ Category
 		</button>
 		<ul class="flex-1 overflow-y-auto">
@@ -47,7 +49,9 @@
 							>
 						</span>
 
+						<!-- Edit Icon -->
 						<svg
+							@click="openEditModal(category)"
 							class="feather feather-edit ml-auto edit-icon"
 							fill="none"
 							height="24"
@@ -70,11 +74,23 @@
 
 		<!-- Add Category Modal -->
 		<div
-			v-if="showModal"
+			v-if="showAddModal"
 			class="fixed inset-0 flex items-center justify-center z-50">
 			<AddCategoryModal
 				@add="addCategory"
-				@close="closeModal"></AddCategoryModal>
+				@close="closeAddModal"></AddCategoryModal>
+		</div>
+
+		<!-- Edit Category Modal -->
+		<div
+			v-else-if="showEditModal"
+			class="fixed inset-0 flex items-center justify-center z-50">
+			<EditCategoryModal
+				v-if="showEditModal"
+				:category="editingCategory"
+				@edit="editCategory"
+				@close="closeEditModal"
+				@delete="deleteCategory" />
 		</div>
 	</aside>
 </template>
@@ -84,14 +100,17 @@ import { ref, computed } from "vue";
 import { useCategoryStore } from "../../stores/categoryStore";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import AddCategoryModal from "../Modals/AddCategoryModal.vue";
+import EditCategoryModal from "../Modals/EditCategoryModal.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
-const showModal = ref(false);
+const showAddModal = ref(false);
+const showEditModal = ref(false);
+const editingCategory = ref(null);
 const categoryStore = useCategoryStore();
+const noteTaskStore = useNoteTaskStore();
 const categories = categoryStore.getCategories;
 const currentCategory = computed(() => categoryStore.currentCategory);
-const noteTaskStore = useNoteTaskStore();
 
 function addCategory({ name, color }) {
 	if (!name.trim()) {
@@ -100,20 +119,59 @@ function addCategory({ name, color }) {
 	}
 	categoryStore.addCategory(name, color);
 	categoryStore.setCurrentCategory(categoryStore.categories[0].id);
-	closeModal();
+	closeAddModal();
 }
-3;
 
-function closeModal() {
-	showModal.value = false;
+function closeAddModal() {
+	showAddModal.value = false;
 }
 
 function setCurrentCategory(categoryId) {
 	categoryStore.setCurrentCategory(categoryId);
 }
 
+function openEditModal(category) {
+	editingCategory.value = { ...category };
+	showEditModal.value = true;
+}
+
+function closeEditModal() {
+	showEditModal.value = false;
+	editingCategory.value = null;
+}
+
+function editCategory({ id, name, color }) {
+	if (!name.trim()) {
+		triggerToast("Category name cannot be empty!");
+		return;
+	}
+	categoryStore.updateCategory(id, { name, color });
+	closeEditModal();
+	triggerSuccessToast("Category updated successfully!");
+}
+
+function deleteCategory(id) {
+	if (
+		!confirm(
+			"WARNING! This category along with all its items will be deleted. Are you sure?"
+		)
+	) {
+		return;
+	}
+	categoryStore.deleteCategory(id);
+	closeEditModal();
+	triggerSuccessToast("Category deleted successfully!");
+}
+
 const triggerToast = (message) => {
 	toast.error(message, {
+		autoClose: 1000,
+		position: toast.POSITION.TOP_CENTER,
+	});
+};
+
+const triggerSuccessToast = (message) => {
+	toast.success(message, {
 		autoClose: 1000,
 		position: toast.POSITION.TOP_CENTER,
 	});

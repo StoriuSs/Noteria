@@ -101,8 +101,8 @@ const deleteNote = () => {
 	if (confirm("Are you sure you want to delete this note?")) {
 		noteTaskStore.deleteItem(currentNote.value.id, "note");
 		noteTaskStore.clearCurrentItem();
+		triggerToast("Note deleted successfully!");
 	}
-	triggerToast("Note deleted successfully!");
 };
 
 const wordCount = computed(() => {
