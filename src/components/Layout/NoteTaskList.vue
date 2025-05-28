@@ -11,8 +11,12 @@
 				+ Task
 			</button>
 		</div>
-		<ul class="flex-1 overflow-y-auto">
-			<li v-for="item in allNotesAndTasks" :key="item.id" class="mb-1.5">
+		<VueDraggable
+			tag="div"
+			ref="el"
+			class="flex-1 overflow-y-auto"
+			:animation="200">
+			<div v-for="item in allNotesAndTasks" :key="item.id" class="mb-1.5">
 				<div
 					class="tooltip w-full"
 					:data-tip="`${item.type} | ${item.updatedAt}`">
@@ -47,8 +51,8 @@
 						</span>
 					</button>
 				</div>
-			</li>
-		</ul>
+			</div>
+		</VueDraggable>
 
 		<div
 			v-if="showModal"
@@ -69,6 +73,7 @@ import { useCategoryStore } from "../../stores/categoryStore";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { VueDraggable } from "vue-draggable-plus";
 
 const showModal = ref(false);
 const modalTitle = ref("");

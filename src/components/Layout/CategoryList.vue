@@ -20,7 +20,7 @@
 		</div>
 
 		<!-- Sidebar content -->
-		<div v-if="!collapsed" class="flex flex-col flex-1">
+		<div v-if="!collapsed" class="flex flex-col flex-1 min-h-0">
 			<input
 				class="input input-bordered w-full mb-4"
 				placeholder="Search note" />
@@ -29,8 +29,12 @@
 				@click="showAddModal = true">
 				+ Category
 			</button>
-			<ul class="flex-1 overflow-y-auto">
-				<li
+			<VueDraggable
+				tag="div"
+				ref="el"
+				class="flex-1 overflow-y-auto"
+				:animation="200">
+				<div
 					class="mb-1.5"
 					v-for="category in categories"
 					:key="category.id">
@@ -38,7 +42,7 @@
 						class="tooltip w-full"
 						:data-tip="`${
 							noteTaskStore.getItemsByCategory(category.id).length
-						} items | ${category.updatedAt}`">
+						} item(s) | ${category.updatedAt}`">
 						<button
 							class="btn btn-ghost w-full flex justify-start category-button"
 							:style="{
@@ -80,8 +84,8 @@
 							</svg>
 						</button>
 					</div>
-				</li>
-			</ul>
+				</div>
+			</VueDraggable>
 		</div>
 		<!-- Add Category Modal -->
 		<div
@@ -114,6 +118,7 @@ import AddCategoryModal from "../Modals/AddCategoryModal.vue";
 import EditCategoryModal from "../Modals/EditCategoryModal.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { VueDraggable } from "vue-draggable-plus";
 
 const collapsed = ref(false);
 function toggleCollapse() {
@@ -194,7 +199,7 @@ const triggerSuccessToast = (message) => {
 };
 </script>
 
-<style scoped>
+<style>
 /* Hide the edit icon */
 .edit-icon {
 	opacity: 0;
@@ -209,5 +214,32 @@ const triggerSuccessToast = (message) => {
 /* Shrink the content span when hovering the button so that the icon is visible*/
 .category-button:hover .category-content {
 	width: 80%;
+}
+
+/* Dragging */
+.sortable-chosen {
+	color: #fff;
+	box-shadow: 0 8px 32px 0 #2563eb99;
+	opacity: 1;
+	z-index: 100;
+	border-radius: 0.5rem;
+	transform: scale(1.04);
+	transition: box-shadow 0.2s, background 0.2s, opacity 0.2s, transform 0.2s;
+	border: 2px solid #60a5fa;
+}
+
+.sortable-ghost {
+	border-radius: 0.5rem;
+	min-height: 44px;
+	opacity: 0.7;
+	margin-bottom: 0.375rem;
+	transition: background 0.2s, opacity 0.2s;
+	border: 2px dashed #f59e42;
+}
+
+/* Hide tooltip when dragging */
+.sortable-chosen .tooltip::before,
+.sortable-chosen .tooltip::after {
+	display: none !important;
 }
 </style>
