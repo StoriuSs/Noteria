@@ -116,11 +116,9 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
 
-			// Delete all notes in this category
 			const notes = noteStore.getNotesByCategory(categoryId);
 			notes.forEach((note) => noteStore.deleteNote(note.id));
 
-			// Delete all tasks in this category
 			const tasks = taskStore.getTasksByCategory(categoryId);
 			tasks.forEach((task) => taskStore.deleteTask(task.id));
 		},
