@@ -179,7 +179,9 @@ function deleteCategory(id) {
 	) {
 		return;
 	}
+	noteTaskStore.deleteItemsByCategory(id); // Delete all items in this category
 	categoryStore.deleteCategory(id);
+	noteTaskStore.clearCurrentItem(); // Clear the editor if the current item is deleted
 	closeEditModal();
 	triggerSuccessToast("Category deleted successfully!");
 }

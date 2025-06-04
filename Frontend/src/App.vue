@@ -3,7 +3,7 @@
 		<!-- Sidebar -->
 		<CategoryList class="border-r border-base-200" />
 		<!-- Notes/Tasks List -->
-		<NoteTaskList class="w-1/6 min-w-[260px] border-r border-base-200" />
+		<NoteTaskList class="w-1/5 min-w-[260px] border-r border-base-200" />
 		<!-- Main Content Area -->
 		<div v-if="type === 'note'" class="flex-1">
 			<NoteEditor class="flex-1" />

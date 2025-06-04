@@ -4,10 +4,10 @@
 			class="input input-bordered w-full mb-4"
 			placeholder="Search in note content" />
 		<div class="flex gap-2 mb-4">
-			<button class="btn btn-info w-28" @click="showNoteModal">
+			<button class="btn btn-info flex-1" @click="showNoteModal">
 				+ Note
 			</button>
-			<button class="btn btn-secondary w-28" @click="showTaskModal">
+			<button class="btn btn-secondary flex-1" @click="showTaskModal">
 				+ Task
 			</button>
 		</div>
