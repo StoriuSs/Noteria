@@ -12,7 +12,8 @@
 			:key="currentNote?.id"
 			class="flex-1 mb-4 bg-base-200 rounded-lg overflow-auto"
 			theme="snow"
-			toolbar="full" />
+			toolbar="full"
+			contentType="html" />
 		<div class="flex gap-3 mt-2 items-center">
 			<!-- Action Buttons -->
 			<button class="btn btn-accent gap-2" @click="updateNote">
@@ -108,17 +109,8 @@ const deleteNote = () => {
 const wordCount = computed(() => {
 	let text = "";
 
-	// Handle Quill Delta format or plain string
 	if (typeof content.value === "string") {
 		text = content.value;
-	} else if (
-		content.value &&
-		content.value.ops &&
-		Array.isArray(content.value.ops)
-	) {
-		text = content.value.ops
-			.map((op) => (typeof op.insert === "string" ? op.insert : ""))
-			.join(" ");
 	}
 
 	const plain = text.replace(/<[^>]*>/g, " ").trim();
