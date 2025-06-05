@@ -23,6 +23,7 @@ const taskSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Category",
 			required: true,
+			index: true,
 		},
 		title: {
 			type: String,
