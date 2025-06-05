@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+    mongodb:
+        image: mongo:latest
+        container_name: noteria-mongodb
+        ports:
+            - "27017:27017"
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=admin
+            - MONGO_INITDB_ROOT_PASSWORD=password123
+        volumes:
+            - mongodb_data:/data/db
+        networks:
+            - noteria-network
+
+volumes:
+    mongodb_data:
+        name: noteria-mongodb-data
+
+networks:
+    noteria-network:
+        name: noteria-network
