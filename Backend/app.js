@@ -1,10 +1,9 @@
 import express from "express";
 import morgan from "morgan";
-import dotenv from "dotenv";
+import { PORT } from "./src/config/env.js";
 import connectDB from "./src/config/database.js";
-
-// Load env
-dotenv.config();
+import authRouter from "./src/routes/auth.route.js";
+import errorMiddleware from "./src/middlewares/error.middleware.js";
 
 // Create Express app
 const app = express();
@@ -21,15 +20,12 @@ app.use(morgan("dev"));
 app.get("/", (req, res) => {
 	res.json({ message: "Welcome to Noteria API" });
 });
+app.use("/api/v1/auth", authRouter);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-	console.error(err.stack);
-	res.status(500).json({ message: "Something went wrong!" });
-});
+app.use(errorMiddleware);
 
 // Start server
-const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
 	console.log(`Server is running on http://localhost:${PORT}`);
 });
