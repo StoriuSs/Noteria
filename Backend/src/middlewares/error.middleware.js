@@ -25,6 +25,15 @@ const errorMiddleware = (err, req, res, next) => {
 			error = new Error(message);
 			error.statusCode = 400;
 		}
+		// JWT errors (e.g., token expired, invalid signature, no refresh token provided)
+		if (
+			err.name === "JsonWebTokenError" ||
+			err.message === "No refresh token provided" ||
+			err.message === "Invalid refresh token"
+		) {
+			error.statusCode = 401;
+			error.message = err.message || "Unauthorized access";
+		}
 
 		res.status(error.statusCode || 500).json({
 			success: false,

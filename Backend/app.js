@@ -1,9 +1,12 @@
 import express from "express";
 import morgan from "morgan";
+import cors from "cors";
 import { PORT } from "./src/config/env.js";
 import connectDB from "./src/config/database.js";
 import authRouter from "./src/routes/auth.route.js";
 import errorMiddleware from "./src/middlewares/error.middleware.js";
+import cookieParser from "cookie-parser";
+import { startCleanupJob } from "./src/services/cleanup.service.js";
 
 // Create Express app
 const app = express();
@@ -11,10 +14,20 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+// Start scheduled cleanup job
+startCleanupJob();
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(
+	cors({
+		origin: "http://localhost:5173",
+		credentials: true,
+	})
+);
+app.use(cookieParser());
 
 // Route
 app.get("/", (req, res) => {

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-
+import ms from "ms";
 import {
 	JWT_SECRET,
 	JWT_EXPIRATION,
@@ -30,6 +30,6 @@ export const verifyRefreshToken = (refreshToken) => {
 
 export const generateVerificationToken = () => {
 	const token = crypto.randomBytes(32).toString("hex");
-	const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+	const expires = new Date(Date.now() + ms("10m")); // 10 minutes
 	return { token, expires };
 };

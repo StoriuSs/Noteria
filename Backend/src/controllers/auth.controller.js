@@ -11,23 +11,24 @@ import {
 	generateTokens,
 	verifyRefreshToken,
 } from "../services/token.service.js";
+import jwt from "jsonwebtoken";
+import {
+	NODE_ENV,
+	JWT_SECRET,
+	JWT_EXPIRATION,
+	JWT_REFRESH_EXPIRATION,
+} from "../config/env.js";
+import User from "../models/user.model.js";
+import ms from "ms";
 
 const signUp = async (req, res, next) => {
 	try {
-		const newUser = await createUser(req.body);
-		const { accessToken, refreshToken } = generateTokens(newUser._id);
-
-		await updateUserRefreshToken(newUser._id, refreshToken);
+		await createUser(req.body);
 
 		res.status(201).json({
 			success: true,
 			message:
 				"User created successfully. Please check your email to verify your account.",
-			data: {
-				accessToken,
-				refreshToken,
-				user: sanitizeUser(newUser),
-			},
 		});
 	} catch (error) {
 		next(error);
@@ -47,15 +48,22 @@ const signIn = async (req, res, next) => {
 
 		await verifyUserPassword(user, password);
 		const { accessToken, refreshToken } = generateTokens(user._id);
-
 		await updateUserRefreshToken(user._id, refreshToken);
+
+		// Set refresh token as HTTP-only cookie
+		res.cookie("refreshToken", refreshToken, {
+			httpOnly: true,
+			secure: NODE_ENV === "production",
+			sameSite: "strict",
+			maxAge: ms(JWT_REFRESH_EXPIRATION),
+			path: "/api/v1/auth/refresh-token",
+		});
 
 		res.status(200).json({
 			success: true,
 			message: "User signed in successfully",
 			data: {
 				accessToken,
-				refreshToken,
 				user: sanitizeUser(user),
 			},
 		});
@@ -66,10 +74,25 @@ const signIn = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
 	try {
-		await verifyUserEmail(req.params.token);
+		const user = await verifyUserEmail(req.params.token);
+		const { accessToken, refreshToken } = generateTokens(user._id);
+		await updateUserRefreshToken(user._id, refreshToken);
+
+		// Set refresh token as HTTP-only cookie
+		res.cookie("refreshToken", refreshToken, {
+			httpOnly: true,
+			secure: NODE_ENV === "production",
+			maxAge: ms(JWT_REFRESH_EXPIRATION),
+			path: "/api/v1/auth/refresh-token",
+		});
+
 		res.status(200).json({
 			success: true,
 			message: "Email verified successfully",
+			data: {
+				accessToken,
+				user: sanitizeUser(user),
+			},
 		});
 	} catch (error) {
 		next(error);
@@ -78,12 +101,12 @@ const verifyEmail = async (req, res, next) => {
 
 const refreshToken = async (req, res, next) => {
 	try {
-		const { refreshToken } = req.body;
+		const refreshToken = req.cookies.refreshToken;
+		if (!refreshToken) {
+			throw new Error("No refresh token provided");
+		}
 
-		// Verify the refresh token
-		const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
-
-		// Find user and check if refresh token is still valid
+		const decoded = verifyRefreshToken(refreshToken);
 		const user = await User.findOne({
 			_id: decoded.userId,
 			refreshTokenExpires: { $gt: Date.now() },
@@ -93,16 +116,11 @@ const refreshToken = async (req, res, next) => {
 			throw new Error("Invalid refresh token");
 		}
 
-		// Generate new access token
 		const accessToken = jwt.sign({ userId: user._id }, JWT_SECRET, {
 			expiresIn: JWT_EXPIRATION,
 		});
 
-		res.json({
-			accessToken,
-			// Return the same refresh token
-			refreshToken,
-		});
+		res.json({ accessToken });
 	} catch (error) {
 		next(error);
 	}
@@ -111,6 +129,12 @@ const refreshToken = async (req, res, next) => {
 const signOut = async (req, res, next) => {
 	try {
 		await clearUserRefreshToken(req.user._id);
+		// Clear the refresh token cookie
+		res.clearCookie("refreshToken", {
+			httpOnly: true,
+			secure: NODE_ENV === "production",
+			path: "/api/v1/auth/refresh-token",
+		});
 		res.status(200).json({
 			success: true,
 			message: "Successfully signed out",

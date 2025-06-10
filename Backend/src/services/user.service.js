@@ -1,29 +1,17 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import ms from "ms";
 import { generateVerificationToken } from "./token.service.js";
 import { sendVerificationEmail } from "./email.service.js";
+import { JWT_REFRESH_EXPIRATION } from "../config/env.js";
 
 export const createUser = async (userData) => {
-	const { username, email, password, confirm_password } = userData;
+	const { username, email, password } = userData;
 	// check if user already exists
 	const existingUser = await User.findOne({ email });
 	if (existingUser) {
 		const error = new Error("User already exists");
 		error.statusCode = 409;
-		throw error;
-	}
-
-	// check if password is too short
-	if (password.length < 6) {
-		const error = new Error("Password can't be shorter than 6 characters");
-		error.statusCode = 400;
-		throw error;
-	}
-
-	// check if confirmation doesn't match
-	if (!confirm_password || password !== confirm_password) {
-		const error = new Error("Confirm password doesn't match");
-		error.statusCode = 400;
 		throw error;
 	}
 
@@ -71,7 +59,7 @@ export const verifyUserPassword = async (user, password) => {
 };
 
 export const updateUserRefreshToken = async (userId, refreshToken) => {
-	const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+	const expires = new Date(Date.now() + ms(JWT_REFRESH_EXPIRATION));
 	return User.findByIdAndUpdate(
 		userId,
 		{

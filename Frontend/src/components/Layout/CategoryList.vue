@@ -86,6 +86,49 @@
 					</div>
 				</div>
 			</VueDraggable>
+
+			<!-- User Menu -->
+			<div class="mt-4 dropdown dropdown-top self-baseline">
+				<button
+					class="btn btn-soft btn-primary btn-circle avatar w-full">
+					<div class="w-10 rounded-full">
+						<!-- User Icon -->
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6 m-2"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+						</svg>
+					</div>
+				</button>
+				<ul
+					class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+					<li>
+						<button @click="handleLogout" class="text-error">
+							<!-- Logout Icon -->
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-5 w-5 mr-2"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+							</svg>
+							Logout
+						</button>
+					</li>
+				</ul>
+			</div>
 		</div>
 		<!-- Add Category Modal -->
 		<div
@@ -112,6 +155,8 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../../stores/authStore";
 import { useCategoryStore } from "../../stores/categoryStore";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import AddCategoryModal from "../Modals/AddCategoryModal.vue";
@@ -120,6 +165,8 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { VueDraggable } from "vue-draggable-plus";
 
+const router = useRouter();
+const authStore = useAuthStore();
 const collapsed = ref(false);
 function toggleCollapse() {
 	collapsed.value = !collapsed.value;
@@ -132,6 +179,13 @@ const categoryStore = useCategoryStore();
 const noteTaskStore = useNoteTaskStore();
 const categories = categoryStore.getCategories;
 const currentCategory = computed(() => categoryStore.currentCategory);
+
+const handleLogout = async () => {
+	if (confirm("Do you want to logout?")) {
+		await authStore.logout();
+		router.push("/login");
+	}
+};
 
 function addCategory({ name, color }) {
 	if (!name.trim()) {
