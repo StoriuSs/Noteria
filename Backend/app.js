@@ -3,7 +3,11 @@ import morgan from "morgan";
 import cors from "cors";
 import { PORT } from "./src/config/env.js";
 import connectDB from "./src/config/database.js";
+
 import authRouter from "./src/routes/auth.route.js";
+import categoryRouter from "./src/routes/category.route.js";
+import noteRouter from "./src/routes/note.route.js";
+
 import errorMiddleware from "./src/middlewares/error.middleware.js";
 import cookieParser from "cookie-parser";
 import { startCleanupJob } from "./src/services/cleanup.service.js";
@@ -34,7 +38,8 @@ app.get("/", (req, res) => {
 	res.json({ message: "Welcome to Noteria API" });
 });
 app.use("/api/v1/auth", authRouter);
-
+app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/notes", noteRouter);
 // Error handling middleware
 app.use(errorMiddleware);
 

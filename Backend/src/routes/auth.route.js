@@ -13,8 +13,8 @@ const authRouter = Router();
 
 authRouter.post("/sign-up", authLimiter, signUp);
 authRouter.post("/sign-in", authLimiter, signIn);
-authRouter.post("/refresh-token", refreshToken);
-authRouter.get("/verify-email/:token", verifyEmail);
+authRouter.post("/refresh-token", authLimiter, refreshToken);
+authRouter.get("/verify-email/:token", authLimiter, verifyEmail);
 // authorize before signing out
 authRouter.post("/sign-out", authorize, signOut);
 

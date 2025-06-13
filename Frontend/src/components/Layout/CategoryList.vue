@@ -33,25 +33,29 @@
 				tag="div"
 				ref="el"
 				class="flex-1 overflow-y-auto"
-				:animation="200">
+				:animation="200"
+				v-model="categoryStore.categories"
+				@update="onDragUpdate">
 				<div
 					class="mb-1.5"
-					v-for="category in categories"
-					:key="category.id">
+					v-for="category in categoryStore.getCategories"
+					:key="category._id">
 					<div
 						class="tooltip w-full"
 						:data-tip="`${
-							noteTaskStore.getItemsByCategory(category.id).length
-						} item(s) | ${category.updatedAt}`">
+							noteTaskStore.getItemsByCategory(category._id)
+								.length
+						} item(s)`">
 						<button
 							class="btn btn-ghost w-full flex justify-start category-button"
+							:data-category-id="category._id"
 							:style="{
 								'background-color':
-									currentCategory === category.id
+									currentCategory === category._id
 										? '#304262'
 										: 'transparent',
 							}"
-							@click="setCurrentCategory(category.id)">
+							@click="setCurrentCategory(category._id)">
 							<span
 								class="flex items-center w-full flex-1 category-content">
 								<span
@@ -177,7 +181,6 @@ const showEditModal = ref(false);
 const editingCategory = ref(null);
 const categoryStore = useCategoryStore();
 const noteTaskStore = useNoteTaskStore();
-const categories = categoryStore.getCategories;
 const currentCategory = computed(() => categoryStore.currentCategory);
 
 const handleLogout = async () => {
@@ -187,13 +190,13 @@ const handleLogout = async () => {
 	}
 };
 
-function addCategory({ name, color }) {
+async function addCategory({ name, color }) {
 	if (!name.trim()) {
 		triggerToast("Category name cannot be empty!");
 		return;
 	}
-	categoryStore.addCategory(name, color);
-	categoryStore.setCurrentCategory(categoryStore.categories[0].id);
+	await categoryStore.addCategory(name, color);
+	categoryStore.setCurrentCategory(categoryStore.categories[0]._id);
 	closeAddModal();
 }
 
@@ -206,7 +209,15 @@ function setCurrentCategory(categoryId) {
 }
 
 function openEditModal(category) {
-	editingCategory.value = { ...category };
+	console.log(
+		"Debugging: Category object passed to openEditModal:",
+		category
+	);
+	console.log(
+		"Debugging: ID of category passed to openEditModal:",
+		category?._id
+	);
+	editingCategory.value = category;
 	showEditModal.value = true;
 }
 
@@ -215,17 +226,25 @@ function closeEditModal() {
 	editingCategory.value = null;
 }
 
-function editCategory({ id, name, color }) {
+function editCategory({ _id, name, color }) {
+	if (!_id) {
+		triggerToast("Category ID is missing! Cannot update.");
+		return;
+	}
 	if (!name.trim()) {
 		triggerToast("Category name cannot be empty!");
 		return;
 	}
-	categoryStore.updateCategory(id, { name, color });
+	categoryStore.updateCategory(_id, { name, color });
 	closeEditModal();
-	triggerSuccessToast("Category updated successfully!");
 }
 
-function deleteCategory(id) {
+function deleteCategory(payload) {
+	const _id = typeof payload === "object" ? payload._id : payload;
+	if (!_id) {
+		triggerToast("Category ID is missing! Cannot delete.");
+		return;
+	}
 	if (
 		!confirm(
 			"WARNING! This category along with all its items will be deleted. Are you sure?"
@@ -233,25 +252,21 @@ function deleteCategory(id) {
 	) {
 		return;
 	}
-	noteTaskStore.deleteItemsByCategory(id); // Delete all items in this category
-	categoryStore.deleteCategory(id);
+	noteTaskStore.deleteItemsByCategory(_id); // Delete all items in this category
+	categoryStore.deleteCategory(_id);
 	noteTaskStore.clearCurrentItem(); // Clear the editor if the current item is deleted
 	closeEditModal();
-	triggerSuccessToast("Category deleted successfully!");
 }
 
 const triggerToast = (message) => {
-	toast.error(message, {
-		autoClose: 1000,
-		position: toast.POSITION.TOP_CENTER,
-	});
+	toast.error(message);
 };
 
-const triggerSuccessToast = (message) => {
-	toast.success(message, {
-		autoClose: 1000,
-		position: toast.POSITION.TOP_CENTER,
-	});
+const onDragUpdate = () => {
+	// Save the new order to localStorage
+	console.log("Dragged!");
+	console.log("Sorted categories:", categoryStore.categories);
+	categoryStore.saveCategoryOrder(categoryStore.categories);
 };
 </script>
 

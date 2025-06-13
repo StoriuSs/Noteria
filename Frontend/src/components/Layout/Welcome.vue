@@ -2,8 +2,12 @@
 	<section
 		class="h-full p-8 flex flex-col items-center justify-center text-center">
 		<div class="max-w-2xl">
-			<h1 class="text-4xl font-bold mb-6">Welcome to Noteria!</h1>
+			<h1 class="text-4xl font-bold mb-6" v-if="authStore.user">
+				Welcome back<span>, {{ authStore.user.username }}</span
+				>!
+			</h1>
 
+			<h1 class="text-4xl font-bold mb-6" v-else>Welcome to Noteria!</h1>
 			<div class="grid grid-cols-2 gap-8 mb-12">
 				<!-- Notes Section -->
 				<div class="card bg-base-200 p-6">
@@ -83,7 +87,9 @@
 
 <script setup>
 import { ref } from "vue";
+import { useAuthStore } from "../../stores/authStore";
 
+const authStore = useAuthStore();
 const noteAbilities = ref([
 	"Rich text editor with formatting",
 	"Organize with categories",

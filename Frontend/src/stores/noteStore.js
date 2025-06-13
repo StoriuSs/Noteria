@@ -1,10 +1,13 @@
 import { defineStore } from "pinia";
 import { useDateFormat } from "@vueuse/core";
 
+const API_URL = "http://localhost:8080/api/v1/notes";
+
 export const useNoteStore = defineStore("note", {
 	state: () => ({
 		notes: [],
 		currentNote: null,
+		loading: false,
 	}),
 
 	getters: {

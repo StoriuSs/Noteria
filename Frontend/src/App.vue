@@ -32,6 +32,7 @@
 import { computed, watch, ref, onMounted, onUnmounted } from "vue"; // Add onUnmounted
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./stores/authStore";
+import { useCategoryStore } from "./stores/categoryStore";
 import { useNoteTaskStore } from "./stores/noteTaskStore";
 import CategoryList from "./components/Layout/CategoryList.vue";
 import NoteTaskList from "./components/Layout/NoteTaskList.vue";
@@ -41,6 +42,7 @@ import TaskEditor from "./components/Layout/TaskEditor.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const categoryStore = useCategoryStore();
 const noteTaskStore = useNoteTaskStore();
 const route = useRoute();
 
@@ -62,10 +64,13 @@ const handleStorageChange = (event) => {
 	}
 };
 
-// Initialize authentication on app mount
+// Initialize authentication and fetch all data needed to Pinia stores on app mount
 onMounted(async () => {
 	try {
 		await authStore.initializeAuth();
+		if (authStore.isAuthenticated) {
+			await categoryStore.fetchCategories();
+		}
 	} catch (error) {
 		console.error("Auth initialization failed:", error);
 	} finally {

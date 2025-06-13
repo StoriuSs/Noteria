@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "vue3-toastify";
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = "http://localhost:8080/api/v1";
+const API_URL = "http://localhost:8080/api/v1/auth";
 
 // Helper to check if access token is expired
 function isAccessTokenExpired(token) {
@@ -16,13 +16,12 @@ function isAccessTokenExpired(token) {
 	}
 }
 
-// Add a flag to prevent multiple logout calls and refresh-token calls
 let isLoggingOut = false;
 let isRefreshingToken = false;
 
 export const useAuthStore = defineStore("auth", {
 	state: () => ({
-		user: null,
+		user: JSON.parse(localStorage.getItem("user")) || null,
 		accessToken: localStorage.getItem("accessToken") || null,
 		isAuthenticated: !!localStorage.getItem("accessToken"),
 	}),
@@ -35,19 +34,12 @@ export const useAuthStore = defineStore("auth", {
 
 	actions: {
 		// Initialize auth state from localStorage
-		async initializeAuth() {
+		initializeAuth() {
 			const accessToken = localStorage.getItem("accessToken");
+			const user = localStorage.getItem("user");
 			if (accessToken) {
-				// Check if access token is expired
 				if (isAccessTokenExpired(accessToken)) {
-					try {
-						// Try to refresh
-						await this.refreshAccessToken();
-						this.isAuthenticated = true;
-					} catch (error) {
-						// Refresh failed (refresh token expired or invalid)
-						this.logout();
-					}
+					this.logout();
 				} else {
 					this.accessToken = accessToken;
 					this.isAuthenticated = true;
@@ -56,12 +48,15 @@ export const useAuthStore = defineStore("auth", {
 					] = `Bearer ${accessToken}`;
 				}
 			}
+			if (user) {
+				this.user = JSON.parse(user);
+			}
 		},
 
 		async login(email, password) {
 			try {
 				const response = await axios.post(
-					`${API_URL}/auth/sign-in`,
+					`${API_URL}/sign-in`,
 					{ email, password },
 					{ withCredentials: true }
 				);
@@ -70,6 +65,7 @@ export const useAuthStore = defineStore("auth", {
 				this.user = user;
 				this.isAuthenticated = true;
 				localStorage.setItem("accessToken", accessToken);
+				localStorage.setItem("user", JSON.stringify(user));
 				axios.defaults.headers.common[
 					"Authorization"
 				] = `Bearer ${accessToken}`;
@@ -81,10 +77,9 @@ export const useAuthStore = defineStore("auth", {
 			}
 		},
 
-		// Only show a success message, do not set tokens or isAuthenticated until verified
 		async register(userData) {
 			try {
-				await axios.post(`${API_URL}/auth/sign-up`, userData);
+				await axios.post(`${API_URL}/sign-up`, userData);
 				toast.success(
 					"Registration successful! Please check your email to verify your account."
 				);
@@ -100,7 +95,7 @@ export const useAuthStore = defineStore("auth", {
 		async verifyEmail(token) {
 			try {
 				const response = await axios.get(
-					`${API_URL}/auth/verify-email/${token}`,
+					`${API_URL}/verify-email/${token}`,
 					{ withCredentials: true }
 				);
 				toast.success(response.data.message);
@@ -109,6 +104,7 @@ export const useAuthStore = defineStore("auth", {
 				this.user = user;
 				this.isAuthenticated = true;
 				localStorage.setItem("accessToken", accessToken);
+				localStorage.setItem("user", JSON.stringify(user));
 				axios.defaults.headers.common[
 					"Authorization"
 				] = `Bearer ${accessToken}`;
@@ -122,19 +118,22 @@ export const useAuthStore = defineStore("auth", {
 		},
 
 		async refreshAccessToken() {
-			// prevent multiple simultaneous refresh calls
 			if (isRefreshingToken || !this.isAuthenticated) {
 				return;
 			}
 			isRefreshingToken = true;
 			try {
 				const response = await axios.post(
-					`${API_URL}/auth/refresh-token`,
+					`${API_URL}/refresh-token`,
 					{},
 					{ withCredentials: true }
 				);
-				const { accessToken } = response.data;
+				const { accessToken, user } = response.data;
 				this.accessToken = accessToken;
+				if (user) {
+					this.user = user;
+					localStorage.setItem("user", JSON.stringify(user));
+				}
 				localStorage.setItem("accessToken", accessToken);
 				axios.defaults.headers.common[
 					"Authorization"
@@ -144,12 +143,11 @@ export const useAuthStore = defineStore("auth", {
 				this.logout();
 				throw error;
 			} finally {
-				isRefreshingToken = false; // reset the flag
+				isRefreshingToken = false;
 			}
 		},
 
 		async logout() {
-			// prevent multiple simultaneous logout calls
 			if (isLoggingOut || !this.isAuthenticated) {
 				return;
 			}
@@ -157,7 +155,7 @@ export const useAuthStore = defineStore("auth", {
 			try {
 				if (this.accessToken) {
 					await axios.post(
-						`${API_URL}/auth/sign-out`,
+						`${API_URL}/sign-out`,
 						{},
 						{
 							headers: {
@@ -174,9 +172,10 @@ export const useAuthStore = defineStore("auth", {
 				this.accessToken = null;
 				this.isAuthenticated = false;
 				localStorage.removeItem("accessToken");
+				localStorage.removeItem("user");
 				delete axios.defaults.headers.common["Authorization"];
 				toast.info("Logged out!");
-				isLoggingOut = false; // Reset the flag
+				isLoggingOut = false;
 			}
 		},
 	},

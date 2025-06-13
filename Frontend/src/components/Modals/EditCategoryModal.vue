@@ -26,7 +26,7 @@
 				class="btn btn-accent"
 				@click="
 					emit('edit', {
-						id: category.id,
+						_id: props.category._id,
 						name: editedCategoryName,
 						color: selectedColor,
 					})
@@ -39,7 +39,7 @@
 			<!-- Delete Icon Button -->
 			<button
 				class="btn btn-ghost btn-square ml-auto"
-				@click="emit('delete', category.id)"
+				@click="emit('delete', { _id: props.category._id })"
 				:title="'Delete Category'">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -60,8 +60,14 @@
 import { ref, watch } from "vue";
 const emit = defineEmits(["edit", "close", "delete"]);
 const props = defineProps({
-	category: String,
+	category: {
+		type: Object,
+		required: true,
+	},
 });
+
+const categoryId = ref(props.category?._id);
+
 const editedCategoryName = ref(props.category?.name || "");
 const selectedColor = ref(props.category?.color || "#e67e22");
 const colors = [
@@ -82,7 +88,8 @@ watch(
 	(newCat) => {
 		editedCategoryName.value = newCat?.name || "";
 		selectedColor.value = newCat?.color || "#e67e22";
-	}
-),
-	{ immediate: true };
+		categoryId.value = newCat?._id;
+	},
+	{ immediate: true }
+);
 </script>

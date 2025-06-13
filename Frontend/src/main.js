@@ -1,12 +1,22 @@
 import "./assets/main.css";
 import Vue3Toasity from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { toast } from "vue3-toastify";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import App from "./App.vue";
 import router from "./router";
+import { useAuthStore } from "./stores/authStore";
+
+const pinia = createPinia();
+
+// Hydrate auth store before app creation
+const tempApp = createApp({});
+tempApp.use(pinia);
+const authStore = useAuthStore();
+authStore.initializeAuth();
 
 const app = createApp(App);
 
@@ -17,11 +27,10 @@ app.component("QuillEditor", QuillEditor);
 app.use(createPinia());
 app.use(router);
 app.use(Vue3Toasity, {
-	autoClose: 3000,
+	autoClose: 2500,
+	position: toast.POSITION.TOP_CENTER,
 	closeOnClick: true,
 	pauseOnHover: true,
-	draggable: true,
-	draggablePercent: 0.6,
 	hideProgressBar: false,
 	closeButton: true,
 	icon: true,
