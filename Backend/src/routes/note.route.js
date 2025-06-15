@@ -2,8 +2,8 @@ import { Router } from "express";
 import authorize from "../middlewares/auth.middleware.js";
 import { apiLimiter } from "../middlewares/rateLimiter.middleware.js";
 import {
+	getCategoryNotes,
 	getAllNotes,
-	// getNoteById,
 	createNote,
 	updateNote,
 	deleteNote,
@@ -12,8 +12,13 @@ import {
 
 const noteRouter = Router();
 
-noteRouter.get("/category/:categoryId", authorize, apiLimiter, getAllNotes);
-// noteRouter.get("/:id", authorize, apiLimiter, getNoteById);
+noteRouter.get(
+	"/category/:categoryId",
+	authorize,
+	apiLimiter,
+	getCategoryNotes
+);
+noteRouter.get("/", authorize, apiLimiter, getAllNotes);
 noteRouter.post("/", authorize, apiLimiter, createNote);
 noteRouter.put("/:id", authorize, apiLimiter, updateNote);
 noteRouter.delete("/:id", authorize, apiLimiter, deleteNote);

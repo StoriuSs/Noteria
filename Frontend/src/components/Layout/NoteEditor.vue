@@ -9,7 +9,7 @@
 		<!-- Note Editor -->
 		<QuillEditor
 			v-model:content="content"
-			:key="currentNote?.id"
+			:key="currentNote?._id"
 			class="flex-1 mb-4 bg-base-200 rounded-lg overflow-auto"
 			theme="snow"
 			toolbar="full"
@@ -86,33 +86,37 @@ watch(
 	{ immediate: true }
 );
 
-const updateNote = () => {
+const updateNote = async () => {
 	if (!currentNote.value) return;
-
-	noteTaskStore.updateItem(currentNote.value.id, "note", {
-		title: title.value,
-		content: content.value,
-	});
-	triggerToast("Note updated successfully!");
+	try {
+		await noteTaskStore.updateItem(currentNote.value._id, "note", {
+			title: title.value,
+			content: content.value,
+		});
+		triggerToast("Note updated successfully!");
+	} catch (e) {
+		triggerToast("Failed to update note");
+	}
 };
 
-const deleteNote = () => {
+const deleteNote = async () => {
 	if (!currentNote.value) return;
-
 	if (confirm("Are you sure you want to delete this note?")) {
-		noteTaskStore.deleteItem(currentNote.value.id, "note");
-		noteTaskStore.clearCurrentItem();
-		triggerToast("Note deleted successfully!");
+		try {
+			await noteTaskStore.deleteItem(currentNote.value._id, "note");
+			noteTaskStore.clearCurrentItem();
+			triggerToast("Note deleted successfully!");
+		} catch (e) {
+			triggerToast("Failed to delete note");
+		}
 	}
 };
 
 const wordCount = computed(() => {
 	let text = "";
-
 	if (typeof content.value === "string") {
 		text = content.value;
 	}
-
 	const plain = text.replace(/<[^>]*>/g, " ").trim();
 	return plain ? plain.split(/\s+/).length : 0;
 });

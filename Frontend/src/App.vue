@@ -70,6 +70,7 @@ onMounted(async () => {
 		await authStore.initializeAuth();
 		if (authStore.isAuthenticated) {
 			await categoryStore.fetchCategories();
+			await noteTaskStore.fetchAllItems();
 		}
 	} catch (error) {
 		console.error("Auth initialization failed:", error);

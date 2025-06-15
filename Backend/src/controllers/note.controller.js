@@ -2,7 +2,7 @@ import Note from "../models/note.model.js";
 import Category from "../models/category.model.js";
 
 // Get all notes for the authenticated user by category
-export const getAllNotes = async (req, res) => {
+export const getCategoryNotes = async (req, res) => {
 	try {
 		const userId = req.user._id;
 		const { categoryId } = req.params;
@@ -11,6 +11,19 @@ export const getAllNotes = async (req, res) => {
 		}
 		const filter = { userId: userId, categoryId: categoryId };
 		const notes = await Note.find(filter).sort({ updatedAt: -1 });
+		res.json(notes);
+	} catch (err) {
+		res.status(500).json({
+			message: "Failed to fetch notes",
+			error: err.message,
+		});
+	}
+};
+
+export const getAllNotes = async (req, res) => {
+	try {
+		const userId = req.user._id;
+		const notes = await Note.find({ userId }).sort({ updatedAt: -1 });
 		res.json(notes);
 	} catch (err) {
 		res.status(500).json({

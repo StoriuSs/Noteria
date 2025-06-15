@@ -209,14 +209,6 @@ function setCurrentCategory(categoryId) {
 }
 
 function openEditModal(category) {
-	console.log(
-		"Debugging: Category object passed to openEditModal:",
-		category
-	);
-	console.log(
-		"Debugging: ID of category passed to openEditModal:",
-		category?._id
-	);
 	editingCategory.value = category;
 	showEditModal.value = true;
 }

@@ -18,6 +18,7 @@ function isAccessTokenExpired(token) {
 
 let isLoggingOut = false;
 let isRefreshingToken = false;
+let failedRequestsQueue = [];
 
 export const useAuthStore = defineStore("auth", {
 	state: () => ({
@@ -34,12 +35,23 @@ export const useAuthStore = defineStore("auth", {
 
 	actions: {
 		// Initialize auth state from localStorage
-		initializeAuth() {
+		async initializeAuth() {
 			const accessToken = localStorage.getItem("accessToken");
 			const user = localStorage.getItem("user");
+			if (user) {
+				this.user = JSON.parse(user);
+			}
 			if (accessToken) {
+				// Check if access token is expired
 				if (isAccessTokenExpired(accessToken)) {
-					this.logout();
+					try {
+						// Try to refresh
+						await this.refreshAccessToken();
+						this.isAuthenticated = true;
+					} catch (error) {
+						// Refresh failed (refresh token expired or invalid)
+						this.logout();
+					}
 				} else {
 					this.accessToken = accessToken;
 					this.isAuthenticated = true;
@@ -47,9 +59,6 @@ export const useAuthStore = defineStore("auth", {
 						"Authorization"
 					] = `Bearer ${accessToken}`;
 				}
-			}
-			if (user) {
-				this.user = JSON.parse(user);
 			}
 		},
 
@@ -118,8 +127,11 @@ export const useAuthStore = defineStore("auth", {
 		},
 
 		async refreshAccessToken() {
-			if (isRefreshingToken || !this.isAuthenticated) {
-				return;
+			if (isRefreshingToken) {
+				// If already refreshing, wait for the current refresh to complete
+				return new Promise((resolve) => {
+					failedRequestsQueue.push(resolve);
+				});
 			}
 			isRefreshingToken = true;
 			try {
@@ -135,9 +147,15 @@ export const useAuthStore = defineStore("auth", {
 					localStorage.setItem("user", JSON.stringify(user));
 				}
 				localStorage.setItem("accessToken", accessToken);
+
 				axios.defaults.headers.common[
 					"Authorization"
 				] = `Bearer ${accessToken}`;
+
+				// Resolve all pending requests with the new token
+				failedRequestsQueue.forEach((resolve) => resolve(accessToken));
+				failedRequestsQueue = []; // Clear the queue
+
 				return accessToken;
 			} catch (error) {
 				this.logout();
@@ -176,6 +194,7 @@ export const useAuthStore = defineStore("auth", {
 				delete axios.defaults.headers.common["Authorization"];
 				toast.info("Logged out!");
 				isLoggingOut = false;
+				failedRequestsQueue = [];
 			}
 		},
 	},

@@ -15,19 +15,20 @@
 			tag="div"
 			ref="el"
 			class="flex-1 overflow-y-auto"
-			:animation="200">
-			<div v-for="item in allNotesAndTasks" :key="item.id" class="mb-1.5">
+			:animation="200"
+			v-model="localItems">
+			<div v-for="item in localItems" :key="item._id" class="mb-1.5">
 				<div
 					class="tooltip w-full"
 					:data-tip="`${item.type} | ${item.updatedAt}`">
 					<button
 						@click="
-							noteTaskStore.setCurrentItem(item.id, item.type)
+							noteTaskStore.setCurrentItem(item._id, item.type)
 						"
 						class="btn btn-ghost w-full justify-start"
 						:style="{
 							'background-color':
-								noteTaskStore.currentItem === item.id &&
+								noteTaskStore.currentItem === item._id &&
 								noteTaskStore.currentItemType === item.type
 									? '#304262'
 									: 'transparent',
@@ -42,7 +43,6 @@
 											? '#00a9e7'
 											: '#DE2A8A',
 								}"></span>
-
 							<!-- Title -->
 							<span
 								class="flex-1 text-left overflow-hidden text-ellipsis whitespace-nowrap">
@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import BaseModal from "../Modals/BaseModal.vue";
 import { useCategoryStore } from "../../stores/categoryStore";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
@@ -80,8 +80,74 @@ const modalTitle = ref("");
 const categoryStore = useCategoryStore();
 const noteTaskStore = useNoteTaskStore();
 
-const allNotesAndTasks = computed(() =>
-	noteTaskStore.getItemsByCategory(categoryStore.currentCategory)
+// Create a local ref for VueDraggable
+const localItems = ref([]);
+
+// Function to save order to localStorage
+const saveItemOrder = (categoryId, items) => {
+	const itemIds = items.map((item) => item._id);
+	const allOrders = JSON.parse(localStorage.getItem("itemOrder") || "{}");
+	allOrders[categoryId] = itemIds;
+	localStorage.setItem("itemOrder", JSON.stringify(allOrders));
+};
+
+// Function to load order from localStorage
+const loadItemOrder = (categoryId, allItems) => {
+	try {
+		const allOrders = JSON.parse(localStorage.getItem("itemOrder") || "{}");
+		const savedOrder = allOrders[categoryId];
+
+		if (savedOrder && savedOrder.length > 0) {
+			const orderedItems = [];
+			const itemMap = new Map(allItems.map((item) => [item._id, item]));
+
+			// Add items in saved order
+			savedOrder.forEach((itemId) => {
+				const item = itemMap.get(itemId);
+				if (item) {
+					orderedItems.push(item);
+					itemMap.delete(itemId);
+				}
+			});
+
+			// Add remaining items
+			itemMap.forEach((item) => {
+				orderedItems.push(item);
+			});
+
+			return orderedItems;
+		}
+	} catch (error) {
+		console.error("Failed to load item order:", error);
+	}
+
+	// Return default order if no saved order
+	return allItems.sort(
+		(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+	);
+};
+
+// Watch for changes in the store and update local ref
+watch(
+	() => noteTaskStore.getItemsByCategory(categoryStore.currentCategory),
+	(newItems) => {
+		// Apply saved order when loading items
+		const orderedItems = loadItemOrder(
+			categoryStore.currentCategory,
+			newItems
+		);
+		localItems.value = [...orderedItems];
+	},
+	{ immediate: true }
+);
+
+// Watch for changes in local ref and save order
+watch(
+	localItems,
+	(newItems) => {
+		saveItemOrder(categoryStore.currentCategory, newItems);
+	},
+	{ deep: true }
 );
 
 const showNoteModal = () => {
@@ -102,25 +168,27 @@ const showTaskModal = () => {
 	modalTitle.value = "Task Title";
 };
 
-const addItem = (title) => {
+const addItem = async (title) => {
 	if (!title?.trim()) {
 		triggerToast("Note/Task title cannot be empty!");
 		return;
 	}
-	noteTaskStore.addItem({
-		type: modalTitle.value === "Note Title" ? "note" : "task",
-		title,
-		categoryId: categoryStore.currentCategory,
-	});
-
-	const items = noteTaskStore.getItemsByCategory(
-		categoryStore.currentCategory
-	);
-	if (items.length > 0) {
-		// Set the first item (newly added) as current
-		noteTaskStore.setCurrentItem(items[0].id, items[0].type);
+	try {
+		await noteTaskStore.addItem({
+			type: modalTitle.value === "Note Title" ? "note" : "task",
+			title,
+			categoryId: categoryStore.currentCategory,
+		});
+		const items = noteTaskStore.getItemsByCategory(
+			categoryStore.currentCategory
+		);
+		if (items.length > 0) {
+			noteTaskStore.setCurrentItem(items[0].id, items[0].type);
+		}
+		closeModal();
+	} catch (e) {
+		triggerToast("Failed to add item");
 	}
-	closeModal();
 };
 
 const closeModal = () => {

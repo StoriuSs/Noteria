@@ -12,22 +12,17 @@ export const useNoteTaskStore = defineStore("noteTask", {
 		getItemsByCategory: (state) => (categoryId) => {
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
-
 			const notes = noteStore.getNotesByCategory(categoryId);
 			const tasks = taskStore.getTasksByCategory(categoryId);
 
-			// Sort by updated date
 			return [...notes, ...tasks].sort(
 				(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
 			);
 		},
-
 		getCurrentItem: (state) => {
 			if (!state.currentItem) return null;
-
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
-
 			return state.currentItemType === "note"
 				? noteStore.getNoteById(state.currentItem)
 				: taskStore.getTaskById(state.currentItem);
@@ -35,13 +30,19 @@ export const useNoteTaskStore = defineStore("noteTask", {
 	},
 
 	actions: {
-		addItem({ type, title, categoryId, content = "" }) {
-			if (!title?.trim()) return;
+		async fetchAllItems() {
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
 
+			await noteStore.fetchAllNotes();
+		},
+
+		async addItem({ type, title, categoryId, content = "" }) {
+			if (!title?.trim()) return;
+			const noteStore = useNoteStore();
+			const taskStore = useTaskStore();
 			if (type === "note") {
-				noteStore.addNote({
+				await noteStore.addNote({
 					title,
 					categoryId,
 					content,
@@ -66,10 +67,8 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			if (!itemId || !type) return;
 			this.currentItem = itemId;
 			this.currentItemType = type;
-
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
-
 			if (type === "note") {
 				noteStore.setCurrentNote(itemId);
 				taskStore.setCurrentTask(null);
@@ -82,44 +81,37 @@ export const useNoteTaskStore = defineStore("noteTask", {
 		clearCurrentItem() {
 			this.currentItem = null;
 			this.currentItemType = null;
-
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
-
 			noteStore.setCurrentNote(null);
 			taskStore.setCurrentTask(null);
 		},
 
-		updateItem(id, type, updates) {
+		async updateItem(id, type, updates) {
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
-
 			if (type === "note") {
-				noteStore.updateNote(id, updates);
+				await noteStore.updateNote(id, updates);
 			} else if (type === "task") {
 				taskStore.updateTask(id, updates);
 			}
 		},
 
-		deleteItem(id, type) {
+		async deleteItem(id, type) {
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
-
 			if (type === "note") {
-				noteStore.deleteNote(id);
+				await noteStore.deleteNote(id);
 			} else if (type === "task") {
 				taskStore.deleteTask(id);
 			}
 		},
 
-		deleteItemsByCategory(categoryId) {
+		async deleteItemsByCategory(categoryId) {
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
-
 			// Delete all notes in this category
-			const notes = noteStore.getNotesByCategory(categoryId);
-			notes.forEach((note) => noteStore.deleteNote(note.id));
-
+			await noteStore.deleteNotesByCategory(categoryId);
 			// Delete all tasks in this category
 			const tasks = taskStore.getTasksByCategory(categoryId);
 			tasks.forEach((task) => taskStore.deleteTask(task.id));
