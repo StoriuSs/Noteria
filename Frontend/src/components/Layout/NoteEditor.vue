@@ -51,12 +51,6 @@
 			</span>
 		</div>
 	</section>
-	<!-- Toast Notification -->
-	<div class="toast toast-top toast-center" v-if="showToast">
-		<div class="alert alert-success text-xl py-6 px-8 w-auto min-w-[150px]">
-			<span>{{ toastMessage }}</span>
-		</div>
-	</div>
 </template>
 
 <script setup>

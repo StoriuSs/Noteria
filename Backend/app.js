@@ -7,10 +7,12 @@ import connectDB from "./src/config/database.js";
 import authRouter from "./src/routes/auth.route.js";
 import categoryRouter from "./src/routes/category.route.js";
 import noteRouter from "./src/routes/note.route.js";
+import taskRouter from "./src/routes/task.route.js";
 
 import errorMiddleware from "./src/middlewares/error.middleware.js";
 import cookieParser from "cookie-parser";
 import { startCleanupJob } from "./src/services/cleanup.service.js";
+import { loadExistingReminders } from "./src/services/reminder.service.js";
 
 // Create Express app
 const app = express();
@@ -20,6 +22,9 @@ connectDB();
 
 // Start scheduled cleanup job
 startCleanupJob();
+
+// Load existing task reminders
+loadExistingReminders();
 
 // Middleware
 app.use(express.json());
@@ -40,6 +45,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/notes", noteRouter);
+app.use("/api/v1/tasks", taskRouter);
 // Error handling middleware
 app.use(errorMiddleware);
 
