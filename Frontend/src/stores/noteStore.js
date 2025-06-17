@@ -94,6 +94,7 @@ export const useNoteStore = defineStore("note", {
 				const note = response.data;
 				this.notes.unshift({ ...note, type: "note" });
 				toast.success("Note created!");
+				return note;
 			} catch (error) {
 				toast.error(
 					error.response?.data?.message || "Failed to create note"

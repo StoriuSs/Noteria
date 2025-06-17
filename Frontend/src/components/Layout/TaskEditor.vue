@@ -97,8 +97,10 @@
 					<select
 						v-model="reminderType"
 						class="select select-bordered w-full">
-						<option value="notification">Notification</option>
 						<option value="email">Email</option>
+						<option value="notification" disabled>
+							Notification (Coming Soon)
+						</option>
 					</select>
 				</div>
 			</div>
@@ -197,7 +199,9 @@
 			</button>
 
 			<span class="text-md opacity-70">
-				<span> Last Updated: {{ currentTask.updatedAt }} </span>
+				<span>
+					Last Updated: {{ isoToNormal(currentTask.updatedAt) }}
+				</span>
 			</span>
 		</div>
 	</section>
@@ -205,6 +209,7 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import { useDateFormat } from "@vueuse/core";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import flatPickr from "vue-flatpickr-component";
 import "flatpickr/dist/flatpickr.css";
@@ -223,11 +228,16 @@ const title = ref("");
 const description = ref("");
 const status = ref("pending");
 const priority = ref("medium");
-const dueDate = ref("");
+const dueDate = ref(null);
 const subtasks = ref([]);
 const hasReminder = ref(false);
-const reminderTime = ref("");
-const reminderType = ref("notification");
+const reminderTime = ref(null);
+const reminderType = ref("email");
+
+// Helper function to convert ISO date to normal format
+const isoToNormal = (isoDate) => {
+	return useDateFormat(isoDate, "YYYY-MM-DD HH:mm:ss");
+};
 
 // Flatpickr configurations
 const dueDateConfig = computed(() => ({
@@ -270,22 +280,22 @@ watch(
 			description.value = task.description || "";
 			status.value = task.status || "pending";
 			priority.value = task.priority || "medium";
-			dueDate.value = task.dueDate || "";
+			dueDate.value = task.dueDate;
 			subtasks.value = task.subtasks || [];
 			hasReminder.value = task.hasReminder || false;
-			reminderTime.value = task.reminderTime || "";
-			reminderType.value = task.reminderType || "notification";
+			reminderTime.value = task.reminderTime;
+			reminderType.value = task.reminderType || "email";
 		} else {
 			// Reset form
 			title.value = "";
 			description.value = "";
 			status.value = "pending";
 			priority.value = "medium";
-			dueDate.value = "";
+			dueDate.value = null;
 			subtasks.value = [];
 			hasReminder.value = false;
-			reminderTime.value = "";
-			reminderType.value = "notification";
+			reminderTime.value = null;
+			reminderType.value = "email";
 		}
 	},
 	{ immediate: true }
@@ -307,31 +317,39 @@ const removeSubtask = (index) => {
 };
 
 // Update task in store
-const updateTask = () => {
+const updateTask = async () => {
 	if (!currentTask.value) return;
 
-	noteTaskStore.updateItem(currentTask.value.id, "task", {
-		title: title.value,
-		description: description.value,
-		status: status.value,
-		priority: priority.value,
-		dueDate: dueDate.value,
-		subtasks: subtasks.value,
-		hasReminder: hasReminder.value,
-		reminderTime: hasReminder.value ? reminderTime.value : null,
-		reminderType: hasReminder.value ? reminderType.value : null,
-	});
-	triggerToast("Task updated successfully!");
+	try {
+		await noteTaskStore.updateItem(currentTask.value._id, "task", {
+			title: title.value,
+			description: description.value,
+			status: status.value,
+			priority: priority.value,
+			dueDate: dueDate.value,
+			subtasks: subtasks.value,
+			hasReminder: hasReminder.value,
+			reminderTime: hasReminder.value ? reminderTime.value : null,
+			reminderType: hasReminder.value ? reminderType.value : null,
+		});
+		triggerToast("Task updated successfully!");
+	} catch (error) {
+		triggerToast("Failed to update task");
+	}
 };
 
 // Delete current task
-const deleteTask = () => {
+const deleteTask = async () => {
 	if (!currentTask.value) return;
 
 	if (confirm("Are you sure you want to delete this task?")) {
-		noteTaskStore.deleteItem(currentTask.value.id, "task");
-		noteTaskStore.clearCurrentItem();
-		triggerToast("Task deleted successfully!");
+		try {
+			await noteTaskStore.deleteItem(currentTask.value._id, "task");
+			noteTaskStore.clearCurrentItem();
+			triggerToast("Task deleted successfully!");
+		} catch (error) {
+			triggerToast("Failed to delete task");
+		}
 	}
 };
 

@@ -15,9 +15,7 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			const notes = noteStore.getNotesByCategory(categoryId);
 			const tasks = taskStore.getTasksByCategory(categoryId);
 
-			return [...notes, ...tasks].sort(
-				(a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
-			);
+			return [...notes, ...tasks];
 		},
 		getCurrentItem: (state) => {
 			if (!state.currentItem) return null;
@@ -34,32 +32,48 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
 
-			await noteStore.fetchAllNotes();
+			await Promise.all([
+				noteStore.fetchAllNotes(),
+				taskStore.fetchAllTasks(),
+			]);
+		},
+
+		async fetchItemsByCategory(categoryId) {
+			const noteStore = useNoteStore();
+			const taskStore = useTaskStore();
+
+			await Promise.all([
+				noteStore.fetchNotes(categoryId),
+				taskStore.fetchTasks(categoryId),
+			]);
 		},
 
 		async addItem({ type, title, categoryId, content = "" }) {
 			if (!title?.trim()) return;
 			const noteStore = useNoteStore();
 			const taskStore = useTaskStore();
+
 			if (type === "note") {
-				await noteStore.addNote({
+				const note = await noteStore.addNote({
 					title,
 					categoryId,
 					content,
 				});
+				return { _id: note._id, type: "note" };
 			} else {
-				taskStore.addTask({
+				const task = await taskStore.addTask({
 					title,
 					categoryId,
 					status: "pending",
 					priority: "medium",
-					description: "",
-					dueDate: "",
+					description: content || "",
+					dueDate: null,
 					subtasks: [],
 					hasReminder: false,
 					reminderTime: null,
 					reminderType: null,
 				});
+				return { _id: task._id, type: "task" };
 			}
 		},
 
@@ -93,7 +107,7 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			if (type === "note") {
 				await noteStore.updateNote(id, updates);
 			} else if (type === "task") {
-				taskStore.updateTask(id, updates);
+				await taskStore.updateTask(id, updates);
 			}
 		},
 
@@ -103,7 +117,7 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			if (type === "note") {
 				await noteStore.deleteNote(id);
 			} else if (type === "task") {
-				taskStore.deleteTask(id);
+				await taskStore.deleteTask(id);
 			}
 		},
 
@@ -113,8 +127,7 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			// Delete all notes in this category
 			await noteStore.deleteNotesByCategory(categoryId);
 			// Delete all tasks in this category
-			const tasks = taskStore.getTasksByCategory(categoryId);
-			tasks.forEach((task) => taskStore.deleteTask(task.id));
+			await taskStore.deleteTasksByCategory(categoryId);
 		},
 	},
 });

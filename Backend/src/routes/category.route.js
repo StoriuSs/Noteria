@@ -10,7 +10,7 @@ import {
 
 const categoryRouter = Router();
 
-categoryRouter.get("/", authorize, apiLimiter, getAllCategories);
+categoryRouter.get("/", authorize, getAllCategories);
 categoryRouter.post("/", authorize, apiLimiter, createCategory);
 categoryRouter.put("/:id", authorize, apiLimiter, updateCategory);
 categoryRouter.delete("/:id", authorize, apiLimiter, deleteCategory);

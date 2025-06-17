@@ -29,6 +29,7 @@
 				@click="showAddModal = true">
 				+ Category
 			</button>
+			<!-- Tooltip has been removed for now, could be back in the future if I change my mind -->
 			<VueDraggable
 				tag="div"
 				ref="el"
@@ -40,12 +41,7 @@
 					class="mb-1.5"
 					v-for="category in categoryStore.getCategories"
 					:key="category._id">
-					<div
-						class="tooltip w-full"
-						:data-tip="`${
-							noteTaskStore.getItemsByCategory(category._id)
-								.length
-						} item(s)`">
+					<div class="tooltip w-full">
 						<button
 							class="btn btn-ghost w-full flex justify-start category-button"
 							:data-category-id="category._id"

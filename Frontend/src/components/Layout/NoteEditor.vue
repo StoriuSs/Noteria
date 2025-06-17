@@ -47,7 +47,9 @@
 
 			<span class="text-md opacity-70">
 				<span class="mr-3"> Word Count: {{ wordCount }} </span>
-				<span> Last Updated: {{ currentNote.updatedAt }} </span>
+				<span>
+					Last Updated: {{ isoToNormal(currentNote.updatedAt) }}
+				</span>
 			</span>
 		</div>
 	</section>
@@ -55,6 +57,7 @@
 
 <script setup>
 import { QuillEditor } from "@vueup/vue-quill";
+import { useDateFormat } from "@vueuse/core";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import { ref, computed, watch } from "vue";
 import { toast } from "vue3-toastify";
@@ -65,6 +68,11 @@ const noteTaskStore = useNoteTaskStore();
 const title = ref("");
 const content = ref("");
 const currentNote = computed(() => noteTaskStore.getCurrentItem);
+
+// Helper function to convert ISO date to normal format
+const isoToNormal = (isoDate) => {
+	return useDateFormat(isoDate, "YYYY-MM-DD HH:mm:ss");
+};
 
 watch(
 	currentNote,

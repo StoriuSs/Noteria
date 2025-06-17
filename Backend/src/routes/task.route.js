@@ -18,7 +18,7 @@ taskRouter.get(
 	apiLimiter,
 	getCategoryTasks
 );
-taskRouter.get("/", authorize, apiLimiter, getAllTasks);
+taskRouter.get("/", authorize, getAllTasks);
 taskRouter.post("/", authorize, apiLimiter, createTask);
 taskRouter.put("/:id", authorize, apiLimiter, updateTask);
 taskRouter.delete("/:id", authorize, apiLimiter, deleteTask);

@@ -11,6 +11,7 @@
 				+ Task
 			</button>
 		</div>
+		<!-- Tooltip has been removed for now, could be back in the future if I change my mind -->
 		<VueDraggable
 			tag="div"
 			ref="el"
@@ -18,9 +19,7 @@
 			:animation="200"
 			v-model="localItems">
 			<div v-for="item in localItems" :key="item._id" class="mb-1.5">
-				<div
-					class="tooltip w-full"
-					:data-tip="`${item.type} | ${item.updatedAt}`">
+				<div class="tooltip w-full">
 					<button
 						@click="
 							noteTaskStore.setCurrentItem(item._id, item.type)
@@ -67,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 import BaseModal from "../Modals/BaseModal.vue";
 import { useCategoryStore } from "../../stores/categoryStore";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
@@ -112,7 +111,7 @@ const loadItemOrder = (categoryId, allItems) => {
 
 			// Add remaining items
 			itemMap.forEach((item) => {
-				orderedItems.push(item);
+				orderedItems.unshift(item);
 			});
 
 			return orderedItems;
@@ -127,18 +126,63 @@ const loadItemOrder = (categoryId, allItems) => {
 	);
 };
 
-// Watch for changes in the store and update local ref
+const isCategorySwitching = ref(false);
+
+// Watch for category changes and handle item loading/ordering
 watch(
-	() => noteTaskStore.getItemsByCategory(categoryStore.currentCategory),
-	(newItems) => {
-		// Apply saved order when loading items
-		const orderedItems = loadItemOrder(
-			categoryStore.currentCategory,
-			newItems
-		);
-		localItems.value = [...orderedItems];
+	() => categoryStore.currentCategory,
+	async (newCategoryId, oldCategoryId) => {
+		// Set flag to prevent store watcher from interfering
+		isCategorySwitching.value = true;
+
+		// Save current order before switching
+		if (oldCategoryId && localItems.value.length > 0) {
+			saveItemOrder(oldCategoryId, localItems.value);
+		}
+
+		if (newCategoryId) {
+			// Fetch items for the new category
+			await noteTaskStore.fetchItemsByCategory(newCategoryId);
+
+			// Get the items and apply saved order
+			const items = noteTaskStore.getItemsByCategory(newCategoryId);
+			const orderedItems = loadItemOrder(newCategoryId, items);
+			localItems.value = [...orderedItems];
+		} else {
+			localItems.value = [];
+		}
+
+		// Clear flag after category switch is complete
+		isCategorySwitching.value = false;
 	},
 	{ immediate: true }
+);
+
+// Watch for store changes (new items, updates, deletions) but not category switches
+watch(
+	() => {
+		// Only watch store data, not category
+		const currentCategory = categoryStore.currentCategory;
+		if (!currentCategory) return [];
+		return noteTaskStore.getItemsByCategory(currentCategory);
+	},
+	(newItems, oldItems) => {
+		// Only update if we have a category and the items actually changed
+		// BUT don't update if this is a category switch (oldItems will be undefined/empty)
+		if (isCategorySwitching.value) return;
+		if (
+			categoryStore.currentCategory &&
+			newItems &&
+			newItems.length !== oldItems?.length
+		) {
+			const orderedItems = loadItemOrder(
+				categoryStore.currentCategory,
+				newItems
+			);
+			localItems.value = [...orderedItems];
+		}
+	},
+	{ deep: true }
 );
 
 // Watch for changes in local ref and save order
@@ -147,7 +191,7 @@ watch(
 	(newItems) => {
 		saveItemOrder(categoryStore.currentCategory, newItems);
 	},
-	{ deep: true }
+	{ deep: true } // helps watching object, array better
 );
 
 const showNoteModal = () => {
@@ -174,16 +218,13 @@ const addItem = async (title) => {
 		return;
 	}
 	try {
-		await noteTaskStore.addItem({
+		const result = await noteTaskStore.addItem({
 			type: modalTitle.value === "Note Title" ? "note" : "task",
 			title,
 			categoryId: categoryStore.currentCategory,
 		});
-		const items = noteTaskStore.getItemsByCategory(
-			categoryStore.currentCategory
-		);
-		if (items.length > 0) {
-			noteTaskStore.setCurrentItem(items[0].id, items[0].type);
+		if (result && result._id && result.type) {
+			noteTaskStore.setCurrentItem(result._id, result.type);
 		}
 		closeModal();
 	} catch (e) {

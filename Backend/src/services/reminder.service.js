@@ -54,7 +54,7 @@ export const scheduleTaskReminder = async (taskId) => {
 				}
 			},
 			{
-				scheduled: false,
+				scheduled: false, // don't start immediately
 			}
 		);
 

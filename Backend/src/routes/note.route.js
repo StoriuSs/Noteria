@@ -18,7 +18,7 @@ noteRouter.get(
 	apiLimiter,
 	getCategoryNotes
 );
-noteRouter.get("/", authorize, apiLimiter, getAllNotes);
+noteRouter.get("/", authorize, getAllNotes);
 noteRouter.post("/", authorize, apiLimiter, createNote);
 noteRouter.put("/:id", authorize, apiLimiter, updateNote);
 noteRouter.delete("/:id", authorize, apiLimiter, deleteNote);

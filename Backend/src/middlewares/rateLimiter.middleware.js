@@ -12,7 +12,7 @@ const authLimiter = rateLimit({
 
 const apiLimiter = rateLimit({
 	windowMs: ms("1m"),
-	max: 30, // 30 requests per minute
+	max: 500, // 500 requests per minute
 	message: {
 		success: false,
 		message: "Too many requests, please try again later",
