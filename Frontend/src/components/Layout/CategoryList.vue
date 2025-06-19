@@ -23,7 +23,8 @@
 		<div v-if="!collapsed" class="flex flex-col flex-1 min-h-0">
 			<input
 				class="input input-bordered w-full mb-4"
-				placeholder="Search note" />
+				placeholder="Search items"
+				v-model="categoryStore.searchQuery" />
 			<button
 				class="btn btn-primary w-full mb-4"
 				@click="showAddModal = true">

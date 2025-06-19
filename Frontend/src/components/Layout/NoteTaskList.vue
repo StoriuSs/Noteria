@@ -1,8 +1,8 @@
 <template>
 	<section class="h-full p-4 flex flex-col bg-base-100">
-		<input
-			class="input input-bordered w-full mb-4"
-			placeholder="Search in note content" />
+		<button class="btn btn-outline mb-4" @click="clearCurrentTargets">
+			Clear current targets
+		</button>
 		<div class="flex gap-2 mb-4">
 			<button class="btn btn-info flex-1" @click="showNoteModal">
 				+ Note
@@ -11,8 +11,53 @@
 				+ Task
 			</button>
 		</div>
-		<!-- Tooltip has been removed for now, could be back in the future if I change my mind -->
+		<!-- Show filtered items if searching -->
+		<div v-if="categoryStore.searchQuery.trim()">
+			<div
+				v-if="filteredItems.length === 0"
+				class="text-center text-gray-400 mt-8">
+				No items found.
+			</div>
+			<div v-for="item in filteredItems" :key="item._id" class="mb-1.5">
+				<button
+					class="btn btn-ghost w-full justify-start"
+					:style="{
+						'background-color':
+							noteTaskStore.currentItem === item._id &&
+							noteTaskStore.currentItemType === item.type
+								? '#304262'
+								: 'transparent',
+						color: item.type === 'task' ? '#DE2A8A' : '#00a9e7',
+					}"
+					@click="handleSearchItemClick(item)">
+					<span class="flex items-center w-full">
+						<span
+							class="inline-block flex-shrink-0 w-4 h-4 rounded-full mr-2"
+							:style="{
+								'background-color':
+									item.type === 'note'
+										? '#00a9e7'
+										: '#DE2A8A',
+							}"></span>
+						<span
+							class="flex-1 text-left overflow-hidden text-ellipsis whitespace-nowrap">
+							{{ item.title }}
+						</span>
+						<span
+							v-if="item.type === 'task'"
+							class="ml-2 text-xs text-pink-400"
+							>Task</span
+						>
+						<span v-else class="ml-2 text-xs text-sky-400"
+							>Note</span
+						>
+					</span>
+				</button>
+			</div>
+		</div>
+		<!-- Otherwise, show normal list -->
 		<VueDraggable
+			v-else
 			tag="div"
 			ref="el"
 			class="flex-1 overflow-y-auto"
@@ -66,7 +111,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import BaseModal from "../Modals/BaseModal.vue";
 import { useCategoryStore } from "../../stores/categoryStore";
 import { useNoteTaskStore } from "../../stores/noteTaskStore";
@@ -78,6 +123,19 @@ const showModal = ref(false);
 const modalTitle = ref("");
 const categoryStore = useCategoryStore();
 const noteTaskStore = useNoteTaskStore();
+
+const filteredItems = computed(() => {
+	if (!categoryStore.searchQuery.trim()) return [];
+	// Always fetch all items before searching
+	noteTaskStore.fetchAllItems();
+	return noteTaskStore.filteredItemsByQuery;
+});
+
+function handleSearchItemClick(item) {
+	categoryStore.currentCategory = item.categoryId;
+	noteTaskStore.setCurrentItem(item._id, item.type);
+	categoryStore.searchQuery = "";
+}
 
 // Create a local ref for VueDraggable
 const localItems = ref([]);
@@ -241,5 +299,10 @@ const triggerToast = (message) => {
 		autoClose: 1000,
 		position: toast.POSITION.TOP_CENTER,
 	});
+};
+
+const clearCurrentTargets = () => {
+	categoryStore.currentCategory = null;
+	noteTaskStore.clearCurrentItem();
 };
 </script>

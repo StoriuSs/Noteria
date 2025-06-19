@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useNoteStore } from "./noteStore";
 import { useTaskStore } from "./taskStore";
+import { useCategoryStore } from "./categoryStore";
 
 export const useNoteTaskStore = defineStore("noteTask", {
 	state: () => ({
@@ -24,6 +25,30 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			return state.currentItemType === "note"
 				? noteStore.getNoteById(state.currentItem)
 				: taskStore.getTaskById(state.currentItem);
+		},
+		filteredItemsByQuery: (state) => {
+			const noteStore = useNoteStore();
+			const taskStore = useTaskStore();
+			const categoryStore = useCategoryStore();
+			const query = categoryStore.searchQuery?.trim().toLowerCase();
+			if (!query) return [];
+
+			// Always search all notes and tasks, regardless of currentCategory
+			const noteResults = noteStore.getAllNotes
+				.filter(
+					(note) =>
+						note.title && note.title.toLowerCase().includes(query)
+				)
+				.map((note) => ({ ...note, type: "note" }));
+
+			const taskResults = taskStore.getAllTasks
+				.filter(
+					(task) =>
+						task.title && task.title.toLowerCase().includes(query)
+				)
+				.map((task) => ({ ...task, type: "task" }));
+
+			return [...noteResults, ...taskResults];
 		},
 	},
 

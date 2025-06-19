@@ -10,6 +10,7 @@ export const useCategoryStore = defineStore("category", {
 		categories: [],
 		currentCategory: null,
 		loading: false,
+		searchQuery: "",
 	}),
 
 	getters: {
