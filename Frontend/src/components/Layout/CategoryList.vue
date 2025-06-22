@@ -51,6 +51,10 @@
 									currentCategory === category._id
 										? '#304262'
 										: 'transparent',
+								color:
+									currentCategory === category._id
+										? '#FFFFFF'
+										: '',
 							}"
 							@click="setCurrentCategory(category._id)">
 							<span
@@ -89,33 +93,17 @@
 			</VueDraggable>
 
 			<!-- User Menu -->
-			<div class="mt-4 dropdown dropdown-top self-baseline">
-				<button
-					class="btn btn-soft btn-primary btn-circle avatar w-full">
-					<div class="w-10 rounded-full">
-						<!-- User Icon -->
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6 m-2"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-						</svg>
-					</div>
-				</button>
-				<ul
-					class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-					<li>
-						<button @click="handleLogout" class="text-error">
-							<!-- Logout Icon -->
+			<div class="mt-4 flex gap-2">
+				<!-- User Dropdown -->
+				<div class="dropdown dropdown-top">
+					<button
+						class="btn btn-soft btn-circle"
+						:title="'User Options'">
+						<div class="w-10 rounded-full">
+							<!-- User Icon -->
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
-								class="h-5 w-5 mr-2"
+								class="h-6 w-6 m-2"
 								fill="none"
 								viewBox="0 0 24 24"
 								stroke="currentColor">
@@ -123,12 +111,71 @@
 									stroke-linecap="round"
 									stroke-linejoin="round"
 									stroke-width="2"
-									d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+									d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
 							</svg>
-							Logout
-						</button>
-					</li>
-				</ul>
+						</div>
+					</button>
+					<ul
+						class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+						<li>
+							<button @click="handleLogout" class="text-error">
+								<!-- Logout Icon -->
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-5 w-5 mr-2"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+								</svg>
+								Logout
+							</button>
+						</li>
+					</ul>
+				</div>
+
+				<!-- Theme Toggle Button -->
+				<button
+					@click="themeStore.toggleTheme()"
+					class="btn btn-circle btn-soft"
+					:title="
+						themeStore.isDarkMode
+							? 'Switch to Light Mode'
+							: 'Switch to Dark Mode'
+					">
+					<!-- Sun Icon for Dark Mode -->
+					<svg
+						v-if="themeStore.isDarkMode"
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+					</svg>
+					<!-- Moon Icon for Light Mode -->
+					<svg
+						v-else
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+					</svg>
+				</button>
 			</div>
 		</div>
 		<!-- Add Category Modal -->
@@ -165,6 +212,7 @@ import EditCategoryModal from "../Modals/EditCategoryModal.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { VueDraggable } from "vue-draggable-plus";
+import { useThemeStore } from "../../stores/themeStore";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -179,6 +227,7 @@ const editingCategory = ref(null);
 const categoryStore = useCategoryStore();
 const noteTaskStore = useNoteTaskStore();
 const currentCategory = computed(() => categoryStore.currentCategory);
+const themeStore = useThemeStore();
 
 const handleLogout = async () => {
 	if (confirm("Do you want to logout?")) {

@@ -10,6 +10,7 @@ import App from "./App.vue";
 import router from "./router";
 import axios from "axios";
 import { useAuthStore } from "./stores/authStore";
+import { useThemeStore } from "./stores/themeStore";
 
 const pinia = createPinia();
 
@@ -18,6 +19,10 @@ const tempApp = createApp({});
 tempApp.use(pinia);
 const authStore = useAuthStore();
 authStore.initializeAuth();
+
+// Initialize theme store
+const themeStore = useThemeStore();
+themeStore.initializeTheme();
 
 const app = createApp(App);
 

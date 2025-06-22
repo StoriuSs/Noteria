@@ -27,7 +27,11 @@
 							noteTaskStore.currentItemType === item.type
 								? '#304262'
 								: 'transparent',
-						color: item.type === 'task' ? '#DE2A8A' : '#00a9e7',
+						color:
+							noteTaskStore.currentItem === item._id &&
+							noteTaskStore.currentItemType === item.type
+								? '#FFFFFF'
+								: '',
 					}"
 					@click="handleSearchItemClick(item)">
 					<span class="flex items-center w-full">
@@ -76,6 +80,11 @@
 								noteTaskStore.currentItemType === item.type
 									? '#304262'
 									: 'transparent',
+							color:
+								noteTaskStore.currentItem === item._id &&
+								noteTaskStore.currentItemType === item.type
+									? '#FFFFFF'
+									: '',
 						}">
 						<span class="flex items-center w-full">
 							<!-- Color indicator -->
@@ -224,21 +233,16 @@ watch(
 		if (!currentCategory) return [];
 		return noteTaskStore.getItemsByCategory(currentCategory);
 	},
-	(newItems, oldItems) => {
+	(newItems) => {
 		// Only update if we have a category and the items actually changed
-		// BUT don't update if this is a category switch (oldItems will be undefined/empty)
+		// BUT don't update if this is a category switch
 		if (isCategorySwitching.value) return;
-		if (
-			categoryStore.currentCategory &&
-			newItems &&
-			newItems.length !== oldItems?.length
-		) {
-			const orderedItems = loadItemOrder(
-				categoryStore.currentCategory,
-				newItems
-			);
-			localItems.value = [...orderedItems];
-		}
+
+		const orderedItems = loadItemOrder(
+			categoryStore.currentCategory,
+			newItems
+		);
+		localItems.value = [...orderedItems];
 	},
 	{ deep: true }
 );
