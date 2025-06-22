@@ -8,6 +8,7 @@ import authRouter from "./src/routes/auth.route.js";
 import categoryRouter from "./src/routes/category.route.js";
 import noteRouter from "./src/routes/note.route.js";
 import taskRouter from "./src/routes/task.route.js";
+import dataRouter from "./src/routes/data.route.js";
 
 import errorMiddleware from "./src/middlewares/error.middleware.js";
 import cookieParser from "cookie-parser";
@@ -46,6 +47,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/notes", noteRouter);
 app.use("/api/v1/tasks", taskRouter);
+app.use("/api/v1/data", dataRouter);
 // Error handling middleware
 app.use(errorMiddleware);
 

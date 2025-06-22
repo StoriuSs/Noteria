@@ -2,6 +2,9 @@ import { defineStore } from "pinia";
 import { useNoteStore } from "./noteStore";
 import { useTaskStore } from "./taskStore";
 import { useCategoryStore } from "./categoryStore";
+import axios from "axios";
+
+const API_URL = "http://localhost:8080/api/v1/data";
 
 export const useNoteTaskStore = defineStore("noteTask", {
 	state: () => ({
@@ -153,6 +156,59 @@ export const useNoteTaskStore = defineStore("noteTask", {
 			await noteStore.deleteNotesByCategory(categoryId);
 			// Delete all tasks in this category
 			await taskStore.deleteTasksByCategory(categoryId);
+		},
+
+		async exportAllData() {
+			const categoryStore = useCategoryStore();
+			const noteStore = useNoteStore();
+			const taskStore = useTaskStore();
+
+			// Always fetch latest data before exporting
+			await Promise.all([
+				categoryStore.fetchCategories(),
+				noteStore.fetchAllNotes(),
+				taskStore.fetchAllTasks(),
+			]);
+
+			const exportObject = {
+				categories: categoryStore.categories,
+				notes: noteStore.notes,
+				tasks: taskStore.tasks,
+			};
+
+			const dataStr = JSON.stringify(exportObject, null, 2);
+			const blob = new Blob([dataStr], {
+				type: "text/plain;charset=utf-8",
+			});
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			const date = new Date().toISOString().slice(0, 10);
+			link.download = `noteria_backup_${date}.json`;
+			link.click();
+			URL.revokeObjectURL(url);
+		},
+
+		async importAllData(fileContent) {
+			try {
+				const data = JSON.parse(fileContent);
+				if (
+					!confirm(
+						"Are you sure you want to import this file? All your current data will be deleted and replaced. This action cannot be undone."
+					)
+				) {
+					return;
+				}
+
+				await axios.post(`${API_URL}/import`, data, {
+					withCredentials: true,
+				});
+				window.location.reload();
+			} catch (error) {
+				throw new Error(
+					error.response?.data?.message || "Failed to import data."
+				);
+			}
 		},
 	},
 });

@@ -93,14 +93,13 @@
 			</VueDraggable>
 
 			<!-- User Menu -->
-			<div class="mt-4 flex gap-2">
+			<div class="mt-8 flex justify-center gap-4">
 				<!-- User Dropdown -->
 				<div class="dropdown dropdown-top">
 					<button
 						class="btn btn-soft btn-circle"
 						:title="'User Options'">
 						<div class="w-10 rounded-full">
-							<!-- User Icon -->
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								class="h-6 w-6 m-2"
@@ -119,7 +118,6 @@
 						class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
 						<li>
 							<button @click="handleLogout" class="text-error">
-								<!-- Logout Icon -->
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									class="h-5 w-5 mr-2"
@@ -137,7 +135,6 @@
 						</li>
 					</ul>
 				</div>
-
 				<!-- Theme Toggle Button -->
 				<button
 					@click="themeStore.toggleTheme()"
@@ -147,7 +144,6 @@
 							? 'Switch to Light Mode'
 							: 'Switch to Dark Mode'
 					">
-					<!-- Sun Icon for Dark Mode -->
 					<svg
 						v-if="themeStore.isDarkMode"
 						xmlns="http://www.w3.org/2000/svg"
@@ -161,7 +157,6 @@
 							stroke-width="2"
 							d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
 					</svg>
-					<!-- Moon Icon for Light Mode -->
 					<svg
 						v-else
 						xmlns="http://www.w3.org/2000/svg"
@@ -176,6 +171,49 @@
 							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
 					</svg>
 				</button>
+				<!-- Import Data Button -->
+				<button
+					@click="triggerImport"
+					class="btn btn-circle btn-soft"
+					:title="'Import Data'">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+					</svg>
+				</button>
+				<!-- Export Data Button -->
+				<button
+					@click="exportData"
+					class="btn btn-circle btn-soft"
+					:title="'Export Data'">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-5 w-5"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+					</svg>
+				</button>
+				<!-- Hidden file input for import -->
+				<input
+					type="file"
+					ref="fileInput"
+					@change="handleFileImport"
+					class="hidden"
+					accept=".json, .txt" />
 			</div>
 		</div>
 		<!-- Add Category Modal -->
@@ -228,6 +266,7 @@ const categoryStore = useCategoryStore();
 const noteTaskStore = useNoteTaskStore();
 const currentCategory = computed(() => categoryStore.currentCategory);
 const themeStore = useThemeStore();
+const fileInput = ref(null);
 
 const handleLogout = async () => {
 	if (confirm("Do you want to logout?")) {
@@ -305,6 +344,39 @@ const onDragUpdate = () => {
 	console.log("Dragged!");
 	console.log("Sorted categories:", categoryStore.categories);
 	categoryStore.saveCategoryOrder(categoryStore.categories);
+};
+
+const exportData = async () => {
+	try {
+		await noteTaskStore.exportAllData();
+		toast.success("Data exported successfully!");
+	} catch (error) {
+		toast.error("An error occurred during export.");
+		console.error("Export error:", error);
+	}
+};
+
+const triggerImport = () => {
+	fileInput.value.click();
+};
+
+const handleFileImport = (event) => {
+	const file = event.target.files[0];
+	if (!file) return;
+	const reader = new FileReader();
+	reader.onload = async (e) => {
+		try {
+			await noteTaskStore.importAllData(e.target.result);
+		} catch (error) {
+			toast.error(error.message || "Failed to import data.");
+			console.error("Import error:", error);
+		}
+	};
+	reader.onerror = () => {
+		toast.error("Failed to read the file.");
+	};
+	reader.readAsText(file);
+	event.target.value = "";
 };
 </script>
 
