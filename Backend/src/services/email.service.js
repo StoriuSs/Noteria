@@ -17,11 +17,17 @@ export const sendVerificationEmail = async (email, token) => {
 		to: email,
 		subject: "Verify Your Email - Noteria",
 		html: `
-      <h1>Welcome to Noteria!</h1>
-      <p>Please verify your email address by clicking the link below:</p>
-      <a href="${verificationUrl}">Verify Email</a>
-      <p>This link will expire in 10 minutes.</p>
-      <p>If you didn't create an account, you can safely ignore this email.</p>
+      <h1 style="color: #333; font-family: Arial, sans-serif;">Welcome to Noteria!</h1>
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: Arial, sans-serif;">
+        <h2 style="color: #333; margin-top: 0;">Email Verification</h2>
+        <p style="color: #666; margin: 16px 0;">To complete your registration and start using Noteria, please verify your email address by clicking the button below:</p>
+        <div style="text-align: center; margin: 25px 0;">
+          <a href="${verificationUrl}" style="background-color: #007bff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Verify My Email</a>
+        </div>
+        <p style="color: #666; margin: 16px 0;">This verification link will expire in 10 minutes.</p>
+        <p style="color: #666; font-size: 12px; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 15px;">If you didn't create an account, you can safely ignore this email.</p>
+      </div>
+      <p style="color: #888; font-size: 12px; font-family: Arial, sans-serif;">This is an automated email from Noteria. Please do not reply to this email.</p>
     `,
 	};
 
@@ -82,7 +88,7 @@ export const sendTaskReminderEmail = async (userEmail, task) => {
 				: ""
 		}
       </div>
-      <p style="color: #666;">This is an automated reminder for your task. Please update the task in Noteria if you changed your mind.</p>
+      <p style="color: #666;">This is an automated email from Noteria. Please do not reply to this email.</p>
     `,
 	};
 

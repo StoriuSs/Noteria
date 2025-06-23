@@ -332,7 +332,7 @@ const updateTask = async () => {
 			reminderTime: hasReminder.value ? reminderTime.value : null,
 			reminderType: hasReminder.value ? reminderType.value : null,
 		});
-		triggerToast("Task updated successfully!");
+		// triggerToast("Task updated successfully!");
 	} catch (error) {
 		triggerToast("Failed to update task");
 	}

@@ -115,6 +115,7 @@ export const useTaskStore = defineStore("task", {
 				const task = response.data;
 				const idx = this.tasks.findIndex((t) => t._id === id);
 				if (idx !== -1) this.tasks[idx] = { ...task, type: "task" };
+				toast.success("Task updated successfully!");
 			} catch (error) {
 				toast.error(
 					error.response?.data?.message || "Failed to update task"
