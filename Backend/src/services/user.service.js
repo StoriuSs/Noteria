@@ -4,6 +4,9 @@ import ms from "ms";
 import { generateVerificationToken } from "./token.service.js";
 import { sendVerificationEmail } from "./email.service.js";
 import { JWT_REFRESH_EXPIRATION } from "../config/env.js";
+import Note from "../models/note.model.js";
+import Task from "../models/task.model.js";
+import Category from "../models/category.model.js";
 
 export const createUser = async (userData) => {
 	const { username, email, password } = userData;
@@ -107,4 +110,12 @@ export const sanitizeUser = (user) => {
 	delete sanitized.verificationToken;
 	delete sanitized.refreshToken;
 	return sanitized;
+};
+
+// Delete user and all their data
+export const deleteUserAndData = async (userId) => {
+	await Note.deleteMany({ userId });
+	await Task.deleteMany({ userId });
+	await Category.deleteMany({ userId });
+	await User.findByIdAndDelete(userId);
 };

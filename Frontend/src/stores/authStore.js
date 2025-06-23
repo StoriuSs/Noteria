@@ -35,6 +35,33 @@ export const useAuthStore = defineStore("auth", {
 
 	actions: {
 		// Initialize auth state from localStorage
+		// async initializeAuth() {
+		// 	const accessToken = localStorage.getItem("accessToken");
+		// 	const user = localStorage.getItem("user");
+		// 	if (user) {
+		// 		this.user = JSON.parse(user);
+		// 	}
+		// 	if (accessToken) {
+		// 		// Check if access token is expired
+		// 		if (isAccessTokenExpired(accessToken)) {
+		// 			try {
+		// 				// Try to refresh
+		// 				await this.refreshAccessToken();
+		// 				this.isAuthenticated = true;
+		// 			} catch (error) {
+		// 				// Refresh failed (refresh token expired or invalid)
+		// 				this.logout();
+		// 			}
+		// 		} else {
+		// 			this.accessToken = accessToken;
+		// 			this.isAuthenticated = true;
+		// 			axios.defaults.headers.common[
+		// 				"Authorization"
+		// 			] = `Bearer ${accessToken}`;
+		// 		}
+		// 	}
+		// },
+
 		async initializeAuth() {
 			const accessToken = localStorage.getItem("accessToken");
 			const user = localStorage.getItem("user");
@@ -50,7 +77,7 @@ export const useAuthStore = defineStore("auth", {
 						this.isAuthenticated = true;
 					} catch (error) {
 						// Refresh failed (refresh token expired or invalid)
-						this.logout();
+						await this.logout(); // <-- ensure state is reset
 					}
 				} else {
 					this.accessToken = accessToken;
@@ -59,9 +86,11 @@ export const useAuthStore = defineStore("auth", {
 						"Authorization"
 					] = `Bearer ${accessToken}`;
 				}
+			} else {
+				// No token, ensure state is clean
+				await this.logout();
 			}
 		},
-
 		async login(email, password) {
 			try {
 				const response = await axios.post(
@@ -81,7 +110,9 @@ export const useAuthStore = defineStore("auth", {
 				toast.success("Login successful!");
 				return true;
 			} catch (error) {
+				// Make sure we show the toast message from the server if available
 				toast.error(error.response?.data?.message || "Login failed");
+				// Ensure that the error is properly thrown to reach the catch block in Login.vue
 				throw error;
 			}
 		},
@@ -195,6 +226,30 @@ export const useAuthStore = defineStore("auth", {
 				toast.info("Logged out!");
 				isLoggingOut = false;
 				failedRequestsQueue = [];
+			}
+		},
+
+		async deleteAccount() {
+			try {
+				if (!this.accessToken) throw new Error("No access token");
+				await axios.delete(`${API_URL}/delete-account`, {
+					headers: {
+						Authorization: `Bearer ${this.accessToken}`,
+					},
+					withCredentials: true,
+				});
+				this.user = null;
+				this.accessToken = null;
+				this.isAuthenticated = false;
+				localStorage.removeItem("accessToken");
+				localStorage.removeItem("user");
+				delete axios.defaults.headers.common["Authorization"];
+				toast.success("Account deleted successfully.");
+			} catch (error) {
+				toast.error(
+					error.response?.data?.message || "Failed to delete account."
+				);
+				throw error;
 			}
 		},
 	},

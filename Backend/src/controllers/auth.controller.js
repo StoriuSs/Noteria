@@ -6,6 +6,7 @@ import {
 	clearUserRefreshToken,
 	verifyUserEmail,
 	sanitizeUser,
+	deleteUserAndData,
 } from "../services/user.service.js";
 import {
 	generateTokens,
@@ -144,4 +145,23 @@ const signOut = async (req, res, next) => {
 	}
 };
 
-export { signUp, signIn, signOut, verifyEmail, refreshToken };
+const deleteAccount = async (req, res, next) => {
+	try {
+		const userId = req.user._id;
+		await deleteUserAndData(userId);
+		// Clear the refresh token cookie
+		res.clearCookie("refreshToken", {
+			httpOnly: true,
+			secure: NODE_ENV === "production",
+			path: "/api/v1/auth/refresh-token",
+		});
+		res.status(200).json({
+			success: true,
+			message: "Account and all data deleted.",
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+export { signUp, signIn, signOut, verifyEmail, refreshToken, deleteAccount };

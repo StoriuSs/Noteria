@@ -53,8 +53,17 @@ axios.interceptors.response.use(
 		const authStore = useAuthStore();
 		const originalRequest = error.config;
 
-		// Check if the error is 401 Unauthorized and it's not a refresh token request itself
-		if (error.response?.status === 401 && !originalRequest._isRetry) {
+		// Skip token refresh for auth endpoints (login, register, etc.)
+		const isAuthEndpoint =
+			originalRequest.url.includes("/api/v1/auth/sign-in") ||
+			originalRequest.url.includes("/api/v1/auth/sign-up");
+
+		// Check if the error is 401 Unauthorized, not a refresh token request itself, and not an auth endpoint
+		if (
+			error.response?.status === 401 &&
+			!originalRequest._isRetry &&
+			!isAuthEndpoint
+		) {
 			originalRequest._isRetry = true; // Mark this request as retried to prevent infinite loops
 
 			try {
