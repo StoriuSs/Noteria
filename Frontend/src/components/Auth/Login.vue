@@ -31,6 +31,13 @@
 							placeholder="Enter your password"
 							class="input input-bordered"
 							required />
+						<label class="label">
+							<router-link
+								to="/forgot-password"
+								class="label-text-alt link link-primary">
+								Forgot Password?
+							</router-link>
+						</label>
 					</div>
 
 					<!-- Submit Button -->

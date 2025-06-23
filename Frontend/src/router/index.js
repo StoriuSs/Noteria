@@ -5,6 +5,8 @@ import { useAuthStore } from "../stores/authStore";
 import Login from "../components/Auth/Login.vue";
 import Register from "../components/Auth/Register.vue";
 import VerifyEmail from "../components/Auth/VerifyEmail.vue";
+import ForgotPassword from "../components/Auth/ForgotPassword.vue";
+import ResetPassword from "../components/Auth/ResetPassword.vue";
 import App from "../App.vue";
 
 const routes = [
@@ -32,6 +34,18 @@ const routes = [
 		path: "/verify-email",
 		name: "VerifyEmail",
 		component: VerifyEmail,
+	},
+	{
+		path: "/forgot-password",
+		name: "ForgotPassword",
+		component: ForgotPassword,
+		meta: { requiresGuest: true },
+	},
+	{
+		path: "/reset-password",
+		name: "ResetPassword",
+		component: ResetPassword,
+		meta: { requiresGuest: true },
 	},
 ];
 

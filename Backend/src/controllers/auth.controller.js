@@ -12,6 +12,7 @@ import {
 	generateTokens,
 	verifyRefreshToken,
 } from "../services/token.service.js";
+import { sendPasswordResetEmail } from "../services/email.service.js";
 import jwt from "jsonwebtoken";
 import {
 	NODE_ENV,
@@ -22,6 +23,7 @@ import {
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import ms from "ms";
+import crypto from "crypto";
 
 const signUp = async (req, res, next) => {
 	try {
@@ -247,6 +249,102 @@ const updateProfile = async (req, res, next) => {
 	}
 };
 
+const forgotPassword = async (req, res, next) => {
+	try {
+		const { email } = req.body;
+
+		// Find user by email
+		const user = await User.findOne({ email });
+
+		if (!user) {
+			return res.status(200).json({
+				success: true,
+				message:
+					"If your email is registered, you will receive a password reset link.",
+			});
+		}
+
+		// Generate random token
+		const resetToken = crypto.randomBytes(32).toString("hex");
+
+		// Set token and expiration (10 minutes)
+		user.resetPasswordToken = resetToken;
+		user.resetPasswordExpires = Date.now() + 600000; // 10 minutes
+
+		await user.save();
+
+		// Send password reset email
+		await sendPasswordResetEmail(email, resetToken);
+
+		res.status(200).json({
+			success: true,
+			message:
+				"If your email is registered, you will receive a password reset link.",
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+const verifyResetToken = async (req, res, next) => {
+	try {
+		const { token } = req.body;
+
+		const user = await User.findOne({
+			resetPasswordToken: token,
+			resetPasswordExpires: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			const error = new Error("Invalid or expired reset token");
+			error.statusCode = 400;
+			throw error;
+		}
+
+		res.status(200).json({
+			success: true,
+			message: "Token is valid",
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+const resetPassword = async (req, res, next) => {
+	try {
+		const { token, newPassword } = req.body;
+
+		// Find user with valid token
+		const user = await User.findOne({
+			resetPasswordToken: token,
+			resetPasswordExpires: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			const error = new Error("Invalid or expired reset token");
+			error.statusCode = 400;
+			throw error;
+		}
+
+		// Update password
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
+		user.password = hashedPassword;
+
+		// Clear reset token
+		user.resetPasswordToken = undefined;
+		user.resetPasswordExpires = undefined;
+
+		await user.save();
+
+		res.status(200).json({
+			success: true,
+			message: "Password has been reset successfully",
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 export {
 	signUp,
 	signIn,
@@ -255,4 +353,7 @@ export {
 	refreshToken,
 	deleteAccount,
 	updateProfile,
+	forgotPassword,
+	verifyResetToken,
+	resetPassword,
 };

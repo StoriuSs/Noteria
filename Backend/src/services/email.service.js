@@ -117,26 +117,33 @@ const getPriorityColor = (priority) => {
 	}
 };
 
-// export const sendPasswordResetEmail = async (email, token) => {
-//   const resetUrl = `${FRONTEND_URL}/reset-password?token=${token}`;
+export const sendPasswordResetEmail = async (email, token) => {
+	const resetUrl = `${FRONTEND_URL}/reset-password?token=${token}`;
 
-//   const mailOptions = {
-//     from: EMAIL_USER,
-//     to: email,
-//     subject: 'Reset Your Password - Noteria',
-//     html: `
-//       <h1>Password Reset Request</h1>
-//       <p>Click the link below to reset your password:</p>
-//       <a href="${resetUrl}">Reset Password</a>
-//       <p>This link will expire in 1 hour.</p>
-//       <p>If you didn't request a password reset, you can safely ignore this email.</p>
-//     `,
-//   };
+	const mailOptions = {
+		from: EMAIL_USER,
+		to: email,
+		subject: "Reset Your Password - Noteria",
+		html: `
+      <h1 style="color: #333; font-family: Arial, sans-serif;">Password Reset Request</h1>
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: Arial, sans-serif;">
+        <h2 style="color: #333; margin-top: 0;">Reset Your Password</h2>
+        <p style="color: #666; margin: 16px 0;">You requested to reset your password for your Noteria account. Click the button below to set a new password:</p>
+        <div style="text-align: center; margin: 25px 0;">
+          <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Reset Password</a>
+        </div>
+        <p style="color: #666; margin: 16px 0;">This password reset link will expire in 10 minutes.</p>
+        <p style="color: #666; font-size: 12px; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 15px;">If you didn't request a password reset, you can safely ignore this email.</p>
+      </div>
+      <p style="color: #888; font-size: 12px; font-family: Arial, sans-serif;">This is an automated email from Noteria. Please do not reply to this email.</p>
+    `,
+	};
 
-//   try {
-//     await transporter.sendMail(mailOptions);
-//   } catch (error) {
-//     console.error('Error sending password reset email:', error);
-//     throw new Error('Failed to send password reset email');
-//   }
-// };
+	try {
+		await transporter.sendMail(mailOptions);
+		console.log(`Password reset email sent to ${email}`);
+	} catch (error) {
+		console.error("Error sending password reset email:", error);
+		throw new Error("Failed to send password reset email");
+	}
+};

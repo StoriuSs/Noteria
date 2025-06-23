@@ -127,6 +127,49 @@ export const useAuthStore = defineStore("auth", {
 			}
 		},
 
+		async requestPasswordReset(email) {
+			try {
+				await axios.post(`${API_URL}/forgot-password`, { email });
+				toast.success("Password reset link sent to your email!");
+				return true;
+			} catch (error) {
+				toast.error(
+					error.response?.data?.message ||
+						"Failed to send password reset email"
+				);
+				throw error;
+			}
+		},
+
+		async verifyResetToken(token) {
+			try {
+				await axios.post(`${API_URL}/verify-reset-token`, { token });
+				return true;
+			} catch (error) {
+				toast.error(
+					error.response?.data?.message ||
+						"Invalid or expired reset token"
+				);
+				throw error;
+			}
+		},
+
+		async resetPassword(token, newPassword) {
+			try {
+				await axios.post(`${API_URL}/reset-password`, {
+					token,
+					newPassword,
+				});
+				toast.success("Password has been reset successfully!");
+				return true;
+			} catch (error) {
+				toast.error(
+					error.response?.data?.message || "Failed to reset password"
+				);
+				throw error;
+			}
+		},
+
 		async refreshAccessToken() {
 			if (isRefreshingToken) {
 				// If already refreshing, wait for the current refresh to complete
