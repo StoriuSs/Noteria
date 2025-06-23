@@ -2,7 +2,7 @@ import rateLimit from "express-rate-limit";
 import ms from "ms";
 
 const authLimiter = rateLimit({
-	windowMs: ms("1m"),
+	windowMs: ms("10m"),
 	max: 10, // 10 attempts
 	message: {
 		success: false,
