@@ -6,6 +6,7 @@ import {
 	verifyEmail,
 	refreshToken,
 	deleteAccount,
+	updateProfile,
 } from "../controllers/auth.controller.js";
 import authorize from "../middlewares/auth.middleware.js";
 import { authLimiter } from "../middlewares/rateLimiter.middleware.js";
@@ -16,8 +17,9 @@ authRouter.post("/sign-up", authLimiter, signUp);
 authRouter.post("/sign-in", authLimiter, signIn);
 authRouter.post("/refresh-token", authLimiter, refreshToken);
 authRouter.get("/verify-email/:token", authLimiter, verifyEmail);
-// authorize before signing out
+
 authRouter.post("/sign-out", authorize, signOut);
 authRouter.delete("/delete-account", authorize, deleteAccount);
+authRouter.put("/update-profile", authorize, updateProfile);
 
 export default authRouter;

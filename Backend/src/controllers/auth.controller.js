@@ -19,6 +19,7 @@ import {
 	JWT_EXPIRATION,
 	JWT_REFRESH_EXPIRATION,
 } from "../config/env.js";
+import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import ms from "ms";
 
@@ -164,4 +165,94 @@ const deleteAccount = async (req, res, next) => {
 	}
 };
 
-export { signUp, signIn, signOut, verifyEmail, refreshToken, deleteAccount };
+const updateProfile = async (req, res, next) => {
+	try {
+		const userId = req.user._id;
+		const { username, currentPassword, newPassword } = req.body;
+		let updateData = {};
+
+		// Check if user exists
+		const user = await User.findById(userId);
+		if (!user) {
+			const error = new Error("User not found");
+			error.statusCode = 404;
+			throw error;
+		}
+
+		// Update username if provided
+		if (username) {
+			updateData.username = username;
+		}
+
+		// Update password if provided
+		if (currentPassword && newPassword) {
+			// Verify current password
+			const isMatch = await bcrypt.compare(
+				currentPassword,
+				user.password
+			);
+			if (!isMatch) {
+				const error = new Error("Current password is incorrect");
+				error.statusCode = 401;
+				throw error;
+			}
+
+			// Validate new password
+			if (newPassword.length < 6) {
+				const error = new Error(
+					"New password must be at least 6 characters"
+				);
+				error.statusCode = 400;
+				throw error;
+			}
+
+			// Hash the new password
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(newPassword, salt);
+			updateData.password = hashedPassword;
+		}
+
+		// Update the user
+		const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+			new: true,
+		});
+
+		// Generate new tokens if password was changed
+		let responseData = {};
+		if (currentPassword && newPassword) {
+			const { accessToken, refreshToken: newRefreshToken } =
+				generateTokens(userId);
+			await updateUserRefreshToken(userId, newRefreshToken);
+
+			// Set refresh token as HTTP-only cookie
+			res.cookie("refreshToken", newRefreshToken, {
+				httpOnly: true,
+				secure: NODE_ENV === "production",
+				maxAge: ms(JWT_REFRESH_EXPIRATION),
+				path: "/api/v1/auth/refresh-token",
+			});
+
+			responseData.accessToken = accessToken;
+		}
+
+		responseData.user = sanitizeUser(updatedUser);
+
+		res.status(200).json({
+			success: true,
+			message: "Profile updated successfully",
+			data: responseData,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+export {
+	signUp,
+	signIn,
+	signOut,
+	verifyEmail,
+	refreshToken,
+	deleteAccount,
+	updateProfile,
+};

@@ -117,6 +117,23 @@
 					<ul
 						class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
 						<li>
+							<button @click="showEditProfileModal = true">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									class="h-5 w-5 mr-2"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+								</svg>
+								Edit Profile
+							</button>
+						</li>
+						<li>
 							<button @click="handleLogout" class="text-error">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -255,6 +272,13 @@
 				@close="closeEditModal"
 				@delete="deleteCategory" />
 		</div>
+
+		<!-- Edit Profile Modal -->
+		<div
+			v-if="showEditProfileModal"
+			class="fixed inset-0 flex items-center justify-center z-50">
+			<EditProfileModal @close="closeEditProfileModal" />
+		</div>
 	</aside>
 </template>
 
@@ -270,12 +294,19 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { VueDraggable } from "vue-draggable-plus";
 import { useThemeStore } from "../../stores/themeStore";
+import EditProfileModal from "../Modals/EditProfileModal.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const collapsed = ref(false);
+const showEditProfileModal = ref(false);
+
 function toggleCollapse() {
 	collapsed.value = !collapsed.value;
+}
+
+function closeEditProfileModal() {
+	showEditProfileModal.value = false;
 }
 
 const showAddModal = ref(false);

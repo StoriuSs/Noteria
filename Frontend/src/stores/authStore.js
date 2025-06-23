@@ -34,34 +34,6 @@ export const useAuthStore = defineStore("auth", {
 	},
 
 	actions: {
-		// Initialize auth state from localStorage
-		// async initializeAuth() {
-		// 	const accessToken = localStorage.getItem("accessToken");
-		// 	const user = localStorage.getItem("user");
-		// 	if (user) {
-		// 		this.user = JSON.parse(user);
-		// 	}
-		// 	if (accessToken) {
-		// 		// Check if access token is expired
-		// 		if (isAccessTokenExpired(accessToken)) {
-		// 			try {
-		// 				// Try to refresh
-		// 				await this.refreshAccessToken();
-		// 				this.isAuthenticated = true;
-		// 			} catch (error) {
-		// 				// Refresh failed (refresh token expired or invalid)
-		// 				this.logout();
-		// 			}
-		// 		} else {
-		// 			this.accessToken = accessToken;
-		// 			this.isAuthenticated = true;
-		// 			axios.defaults.headers.common[
-		// 				"Authorization"
-		// 			] = `Bearer ${accessToken}`;
-		// 		}
-		// 	}
-		// },
-
 		async initializeAuth() {
 			const accessToken = localStorage.getItem("accessToken");
 			const user = localStorage.getItem("user");
@@ -77,7 +49,7 @@ export const useAuthStore = defineStore("auth", {
 						this.isAuthenticated = true;
 					} catch (error) {
 						// Refresh failed (refresh token expired or invalid)
-						await this.logout(); // <-- ensure state is reset
+						await this.logout();
 					}
 				} else {
 					this.accessToken = accessToken;
@@ -110,9 +82,7 @@ export const useAuthStore = defineStore("auth", {
 				toast.success("Login successful!");
 				return true;
 			} catch (error) {
-				// Make sure we show the toast message from the server if available
 				toast.error(error.response?.data?.message || "Login failed");
-				// Ensure that the error is properly thrown to reach the catch block in Login.vue
 				throw error;
 			}
 		},
@@ -248,6 +218,45 @@ export const useAuthStore = defineStore("auth", {
 			} catch (error) {
 				toast.error(
 					error.response?.data?.message || "Failed to delete account."
+				);
+				throw error;
+			}
+		},
+
+		async updateProfile(updateData) {
+			try {
+				if (!this.accessToken) throw new Error("No access token");
+				const response = await axios.put(
+					`${API_URL}/update-profile`,
+					updateData,
+					{
+						headers: {
+							Authorization: `Bearer ${this.accessToken}`,
+						},
+						withCredentials: true,
+					}
+				);
+
+				// If the username was updated, update the user object
+				if (updateData.username && response.data.data?.user) {
+					this.user = response.data.data.user;
+					localStorage.setItem("user", JSON.stringify(this.user));
+				}
+
+				// If we received a new token after password change
+				if (response.data.data?.accessToken) {
+					this.accessToken = response.data.data.accessToken;
+					localStorage.setItem("accessToken", this.accessToken);
+					axios.defaults.headers.common[
+						"Authorization"
+					] = `Bearer ${this.accessToken}`;
+				}
+
+				toast.success("Profile updated successfully!");
+				return true;
+			} catch (error) {
+				toast.error(
+					error.response?.data?.message || "Failed to update profile."
 				);
 				throw error;
 			}
