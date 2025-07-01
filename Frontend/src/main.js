@@ -78,7 +78,9 @@ axios.interceptors.response.use(
 				// Retry the original request with the new token
 				return axios(originalRequest);
 			} catch (refreshError) {
-				authStore.logout();
+				await authStore.logout();
+				// Redirect to login page after logout
+				window.location.href = "/login";
 				return Promise.reject(refreshError);
 			}
 		}

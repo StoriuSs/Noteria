@@ -3,7 +3,7 @@ import ms from "ms";
 
 const authLimiter = rateLimit({
 	windowMs: ms("10m"),
-	max: 10, // 10 attempts
+	max: 50, // 50 attempts
 	message: {
 		success: false,
 		message: "Too many attempts, please try again after 10 minutes",
