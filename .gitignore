@@ -34,4 +34,3 @@ coverage
 **/.env.*
 !.env.example
 
-/screenshots/
