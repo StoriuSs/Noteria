@@ -127,6 +127,7 @@ import { useNoteTaskStore } from "../../stores/noteTaskStore";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { VueDraggable } from "vue-draggable-plus";
+import debounce from "lodash/debounce";
 
 const showModal = ref(false);
 const modalTitle = ref("");
@@ -135,10 +136,18 @@ const noteTaskStore = useNoteTaskStore();
 
 const filteredItems = computed(() => {
 	if (!categoryStore.searchQuery.trim()) return [];
-	// Always fetch all items before searching
-	noteTaskStore.fetchAllItems();
 	return noteTaskStore.filteredItemsByQuery;
 });
+
+watch(
+	() => categoryStore.searchQuery,
+	debounce(async (query) => {
+		if (query.trim()) {
+			await noteTaskStore.fetchAllItems();
+		}
+	}, 300),
+	{ immediate: false }
+);
 
 function handleSearchItemClick(item) {
 	categoryStore.currentCategory = item.categoryId;
