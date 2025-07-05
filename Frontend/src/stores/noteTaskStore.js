@@ -4,7 +4,7 @@ import { useTaskStore } from "./taskStore";
 import { useCategoryStore } from "./categoryStore";
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/v1/data";
+const API_URL = "https://noteria-backend.onrender.com/api/v1/data";
 
 export const useNoteTaskStore = defineStore("noteTask", {
 	state: () => ({

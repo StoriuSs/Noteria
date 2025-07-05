@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "vue3-toastify";
 import { useAuthStore } from "./authStore";
 
-const API_URL = "http://localhost:8080/api/v1/notes";
+const API_URL = "https://noteria-backend.onrender.com/api/v1/notes";
 
 export const useNoteStore = defineStore("note", {
 	state: () => ({
