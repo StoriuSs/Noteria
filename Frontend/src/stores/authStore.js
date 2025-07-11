@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "vue3-toastify";
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = "https://noteria-backend.onrender.com/api/v1/auth";
+const API_URL = "http://localhost:8080/api/v1/auth";
 
 // Helper to check if access token is expired
 function isAccessTokenExpired(token) {
