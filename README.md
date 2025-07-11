@@ -2,9 +2,6 @@
 
 Noteria is a modern, full-featured note-taking and productivity app designed to help you organize your thoughts, tasks, and life—all in one place. With a clean interface, powerful features, and seamless user experience, Noteria is perfect for students, professionals, and anyone who wants to stay organized.
 
-(NOTE!!! Due to only using Render's free plan for now to deploy, you have to wait for about 1 minute to be able to use the app, and the responses are pretty slow.)
-https://noteria-frontend.onrender.com/
-
 ---
 
 ## 🚀 Features
