@@ -33,7 +33,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(
 	cors({
-		origin: "https://noteria-frontend.onrender.com",
+		// origin: "https://noteria-frontend.onrender.com",
+		origin: "http://localhost:5173",
 		credentials: true,
 	})
 );
